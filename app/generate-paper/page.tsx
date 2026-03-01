@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { FaGraduationCap, FaArrowLeft, FaChevronRight, FaCheckCircle, FaUserShield } from "react-icons/fa";
+import { FaGraduationCap, FaArrowLeft, FaChevronRight, FaCheckCircle, FaBookOpen } from "react-icons/fa";
 import Navbar from '../components/navbar/page';
 import PaperPreview from '../paper/page'; 
 import axios from 'axios';
@@ -10,93 +10,69 @@ export default function GeneratePaper() {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedClassName, setSelectedClassName] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
-  const [selectedChapters, setSelectedChapters] = useState<string[]>([]);
+  const [selectedChapters, setSelectedChapters] = useState<any[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [step, setStep] = useState(1);
   
   const [classes, setClasses] = useState<any[]>([]);
   const [fullData, setFullData] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // --- DATA FETCHING & LOGIC ---
-// Frontend: GeneratePaper.tsx
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get('https://backendrepoo-production.up.railway.app/api/classes'); 
-      
-      let rawData = res.data;
-      let allDataFromDB = [];
+  const API_BASE = "http://localhost:5000/api"; 
 
-      // Structure Normalization
-      if (Array.isArray(rawData)) {
-        allDataFromDB = rawData[0]?.classes || rawData;
-      } else if (rawData.classes) {
-        allDataFromDB = rawData.classes;
-      }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_BASE}/classes`); 
+        let rawData = res.data;
+        let allDataFromDB = Array.isArray(rawData) ? (rawData[0]?.classes || rawData) : (rawData.classes || []);
 
-      const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
-      setUser(loggedInUser);
+        const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
+        setUser(loggedInUser);
 
-      // --- ONLY ROLE-BASED CHECK ---
-      const isAdmin = loggedInUser.role === 'admin' || loggedInUser.role === 'superadmin';
-      
-      let finalClasses = [];
-
-      if (isAdmin) {
-        // Admin ko database ka sara data milega, chahe uski apni 'classes' array khali ho
-        finalClasses = allDataFromDB;
-      } else {
-        // Teacher ya kisi aur role ke liye filtered data
-        finalClasses = allDataFromDB.filter((c: any) => 
+        const isAdmin = loggedInUser.role === 'admin' || loggedInUser.role === 'superadmin';
+        let finalClasses = isAdmin ? allDataFromDB : allDataFromDB.filter((c: any) => 
           loggedInUser.classes?.includes(c.title)
-        )
-        .map((c: any) => ({
+        ).map((c: any) => ({
           ...c,
-          subjects: (c.subjects || []).filter((s: any) => 
-            loggedInUser.subjects?.includes(s.name)
-          )
-        }))
-        .filter((c: any) => c.subjects && c.subjects.length > 0);
+          subjects: (c.subjects || []).filter((s: any) => loggedInUser.subjects?.includes(s.name))
+        })).filter((c: any) => c.subjects?.length > 0);
+
+        setClasses(finalClasses);
+        const dataMap: any = {};
+        finalClasses.forEach((c: any) => { dataMap[c.id || c.title] = c; });
+        setFullData(dataMap);
+      } catch (error) { 
+        toast.error("Database Connection Failed");
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchData();
+  }, []);
 
-      setClasses(finalClasses);
-      
-      const dataMap: any = {};
-      finalClasses.forEach((c: any) => { 
-        const key = c.id || c.title; 
-        dataMap[key] = c; 
-      });
-      setFullData(dataMap);
-
-    } catch (error) { 
-      toast.error("Database Connection Failed");
-      console.error("Fetch Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchData();
-}, []);
-  // --- REST OF THE CODE REMAINS SAME ---
-
-  const currentSubjects = (selectedClassId && fullData && fullData[selectedClassId]) 
-    ? (fullData[selectedClassId].subjects || []) : [];
+  const currentSubjects = (selectedClassId && fullData && fullData[selectedClassId]) ? (fullData[selectedClassId].subjects || []) : [];
 
   const handleBack = () => {
-    if (selectedSubject) { 
-        setSelectedSubject(null); 
-        setSelectedChapters([]); 
-    } else if (selectedClassId) { 
-        setSelectedClassId(null); 
-        setSelectedClassName(null); 
-    }
+    if (step === 3) { setStep(2); setSelectedChapters([]); setSelectedTopics([]); setSelectedSubject(null); }
+    else if (step === 2) { setStep(1); setSelectedClassId(null); setSelectedClassName(null); }
   };
 
-  const toggleChapter = (chapterName: string) => {
-    setSelectedChapters(prev => 
-      prev.includes(chapterName) ? prev.filter(c => c !== chapterName) : [...prev, chapterName]
+  const toggleChapter = (chapterObj: any) => {
+    const chName = chapterObj.name || chapterObj;
+    setSelectedChapters(prev => {
+      const isExist = prev.find(c => (c.name || c) === chName);
+      if (isExist) return prev.filter(c => (c.name || c) !== chName);
+      return [...prev, chapterObj];
+    });
+  };
+
+  const toggleTopic = (topicName: string) => {
+    setSelectedTopics(prev => 
+      prev.includes(topicName) ? prev.filter(t => t !== topicName) : [...prev, topicName]
     );
   };
 
@@ -105,13 +81,11 @@ useEffect(() => {
       <PaperPreview 
         className={selectedClassName || ''}
         subject={selectedSubject}
-        chapters={selectedChapters}
+        chapters={selectedChapters.map(c => c.name || c)}
         onClose={() => setShowPreview(false)}
       />
     );
   }
-
-  const isAdminUser = user?.role === 'superadmin' || user?.email === 'admin@example.com';
 
   return (
     <div className="h-screen w-screen bg-[#f8fafc] flex overflow-hidden font-sans">
@@ -121,56 +95,41 @@ useEffect(() => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 z-10">
           <div className="flex items-center gap-4">
-            {(selectedClassId || selectedSubject) && (
+            {step > 1 && (
               <button onClick={handleBack} className="p-2 hover:bg-slate-100 rounded-full text-slate-600 transition-colors">
                 <FaArrowLeft />
               </button>
             )}
-            <div>
-              <h1 className="text-xl font-black text-slate-800 uppercase tracking-tight">
-                {selectedSubject ? `${selectedSubject.name}` : selectedClassName ? `${selectedClassName} Subjects` : 'Generate Test Paper'}
-              </h1>
-              {isAdminUser && (
-                <span className="text-[10px] text-blue-600 font-bold uppercase tracking-widest flex items-center gap-1">
-                  <FaUserShield /> Full Admin Access
-                </span>
-              )}
-            </div>
+            <h1 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+              {step === 3 ? `${selectedSubject?.name}` : step === 2 ? `${selectedClassName} Subjects` : 'Generate Test Paper'}
+            </h1>
           </div>
-          
           <div className="flex items-center gap-4">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                Step {selectedSubject ? "3" : selectedClassId ? "2" : "1"} of 3
-            </span>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Step {step} of 3</span>
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-12">
-          
           {loading ? (
-             <div className="h-full flex items-center justify-center font-black text-slate-300 animate-pulse uppercase tracking-widest">
-                Loading System Data...
-             </div>
+             <div className="h-full flex items-center justify-center font-black text-slate-300 animate-pulse uppercase tracking-widest">Loading...</div>
           ) : (
             <>
-              {/* STEP 1 */}
-              {!selectedClassId && (
+              {/* STEP 1: CLASSES (Your Specific Style) */}
+              {step === 1 && (
                 <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
-                  <h2 className="text-3xl font-black text-slate-900 mb-10">
-                    {isAdminUser ? 'All Classes (Master View)' : 'Your Assigned Classes'}
-                  </h2>
+                  <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight">Select Class</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {classes.length > 0 ? classes.map((item: any) => (
                       <div 
                         key={item.id} 
-                        onClick={() => { setSelectedClassId(item.id); setSelectedClassName(item.title); }} 
-                        className="group relative bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer h-72"
+                        onClick={() => { setSelectedClassId(item.id); setSelectedClassName(item.title); setStep(2); }} 
+                        className="group relative bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer h-72"
                       >
-                        <img src={item.img} className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 opacity-20 group-hover:opacity-40" alt={item.title} />
+                        <img src={item.img || item.image} className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 opacity-20 group-hover:opacity-40" alt={item.title} />
                         <div className="absolute inset-0 bg-gradient-to-b from-white via-white/80 to-transparent group-hover:opacity-0 transition-opacity duration-500" />
                         <div className="relative p-8 h-full flex flex-col justify-between z-10">
                           <div>
-                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-lg mb-4`}>
+                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.color || 'from-blue-600 to-blue-400'} flex items-center justify-center text-white shadow-lg mb-4`}>
                               <FaGraduationCap size={20} />
                             </div>
                             <h3 className="text-2xl font-black text-slate-800">{item.title}</h3>
@@ -190,62 +149,96 @@ useEffect(() => {
                 </div>
               )}
 
-              {/* STEP 2 */}
-              {selectedClassId && !selectedSubject && (
-                <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-in slide-in-from-right-10 duration-500">
-                  {currentSubjects.map((sub: any, i: number) => (
-                    <div key={i} onClick={() => setSelectedSubject(sub)} className="group bg-white p-4 rounded-xl border shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
-                      <div className="relative h-28 rounded-xl overflow-hidden mb-4 bg-slate-100">
-                        <img src={sub.image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" />
+              {/* STEP 2: SUBJECTS */}
+              {step === 2 && (
+                <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
+                  <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight">Select Subject</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {currentSubjects.map((sub: any, i: number) => (
+                      <div key={i} onClick={() => { setSelectedSubject(sub); setStep(3); }} className="group bg-white p-2 rounded-xl border border-slate-100 hover:border-blue-500 cursor-pointer transition-all shadow-sm hover:shadow-xl">
+                        <div className="h-45 rounded-xl bg-slate-100 mb-4 overflow-hidden">
+                          <img src={sub.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={sub.name} />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-800 text-center pb-2">{sub.name}</h3>
                       </div>
-                      <h3 className="text-xl font-black text-slate-800 px-2">{sub.name}</h3>
-                    </div>
-                  ))}
-                  {currentSubjects.length === 0 && (
-                      <div className="col-span-full text-center py-20 text-slate-400 font-bold italic">
-                          No subjects found for this class.
-                      </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* STEP 3 */}
-              {selectedSubject && (
-                <div className="max-w-4xl mx-auto animate-in slide-in-from-bottom-10 duration-500">
-                  <div className="flex justify-between items-end mb-10">
+              {/* STEP 3: COMPACT CHAPTERS & TOPICS */}
+              {step === 3 && (
+                <div className="max-w-6xl mx-auto animate-in fade-in duration-500 pb-10">
+                  <div className="sticky -top-12 z-20 bg-slate-100 backdrop-blur-md py-4 mb-6 border-b border-slate-200 flex justify-between items-center px-2">
                     <div>
-                      <h2 className="text-4xl font-black text-slate-900 tracking-tight">Select Chapters</h2>
-                      <p className="text-slate-500 font-bold mt-2">Selected: {selectedChapters.length}</p>
+                      <h2 className="text-2xl font-black text-slate-800 tracking-tight">Select Chapters & Topics</h2>
+                      <div className="flex gap-3 mt-1 text-[10px] font-bold uppercase">
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">Selected Chapters: {selectedChapters.length}</span>
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded">Selected Topics: {selectedTopics.length}</span>
+                      </div>
                     </div>
                     <button 
-                      onClick={() => setShowPreview(true)}
+                      onClick={() => setShowPreview(true)} 
                       disabled={selectedChapters.length === 0}
-                      className={`px-10 py-5 rounded-md font-black shadow-xl transition-all ${selectedChapters.length > 0 ? 'bg-blue-600 text-white hover:scale-105' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                      className="px-8 py-3 rounded-xl font-black text-sm bg-slate-900 text-white shadow-lg hover:bg-black disabled:bg-slate-200 disabled:text-slate-400 transition-all active:scale-95"
                     >
-                      Generate Paper 
+                      Generate Paper
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedSubject.chapters.map((chapter: any, idx: number) => {
-                      const chapterName = typeof chapter === 'string' ? chapter : chapter.name;
-                      const isSelected = selectedChapters.includes(chapterName);
-                      
+                      const chapterName = chapter.name || chapter;
+                      const chapterTopics = chapter.topics || [];
+                      const isChapterSelected = selectedChapters.find(c => (c.name || c) === chapterName);
+
                       return (
-                        <div 
-                          key={idx} 
-                          onClick={() => toggleChapter(chapterName)} 
-                          className={`p-6 rounded-md border-2 transition-all cursor-pointer flex items-center justify-between ${
-                            isSelected ? 'border-blue-600 bg-blue-50/50' : 'bg-white border-slate-100 hover:border-blue-200'
-                          }`}
-                        >
-                          <span className={`font-bold ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>
-                            {idx + 1}. {chapterName}
-                          </span>
-                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                            isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-200'
-                          }`}>
-                            {isSelected && <FaCheckCircle className="text-white text-[10px]" />}
+                        <div key={idx} className={`rounded-xl border transition-all overflow-hidden ${isChapterSelected ? 'border-blue-400 bg-white shadow-md' : 'border-slate-200 bg-slate-50/50 opacity-90'}`}>
+                          <div 
+                            onClick={() => toggleChapter(chapter)}
+                            className={`p-4 cursor-pointer flex items-center justify-between border-b ${isChapterSelected ? 'bg-blue-50/30 border-blue-100' : 'border-transparent'}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`p-2 rounded-lg flex items-center justify-center font-bold text-xs ${isChapterSelected ? 'bg-blue-600 text-white' : 'bg-white text-slate-400 border border-slate-200'}`}>
+                                 Chapter {idx + 1}
+                              </span>
+                              <h3 className={`text-sm font-bold  w-auto ${isChapterSelected ? 'text-slate-900' : 'text-slate-700'}`}>
+                                {chapterName}
+                              </h3>
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isChapterSelected ? 'bg-blue-600 border-blue-600 shadow-sm' : 'border-slate-300'}`}>
+                              {isChapterSelected && <FaCheckCircle className="text-white text-[8px]" />}
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-white">
+                            <div className="flex  gap-1">
+                              {chapterTopics.length > 0 ? chapterTopics.map((topic: any, tIdx: number) => {
+                                const topicName = typeof topic === 'string' ? topic : topic.name;
+                                const topicId = topic.id || `${idx + 1}.${tIdx + 1}`;
+                                const isTopicSelected = selectedTopics.includes(topicName);
+
+                                return (
+                                  <div
+                                    key={tIdx}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (!isChapterSelected) toggleChapter(chapter);
+                                      toggleTopic(topicName);
+                                    }}
+                                    className={`flex w-65 items-center gap-3 p-2 rounded-lg cursor-pointer border transition-all ${isTopicSelected ? 'border-green-200 bg-green-50/50 text-green-800 shadow-sm' : 'border-transparent bg-slate-200 text-slate-500 hover:bg-slate-100'}`}
+                                  >
+                                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${isTopicSelected ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-400 border-slate-200 shadow-sm'}`}>
+                                      ID: {topicId}
+                                    </span>
+                                    <span className="text-xs font-medium truncate">{topicName}</span>
+                                    {isTopicSelected && <FaCheckCircle className="ml-auto text-green-600 text-[10px]" />}
+                                  </div>
+                                );
+                              }) : (
+                                <div className="text-[10px] text-slate-400 italic py-1 px-2">No specific topics available.</div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
