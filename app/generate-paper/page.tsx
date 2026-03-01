@@ -20,7 +20,8 @@ export default function GeneratePaper() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE = "http://localhost:5000/api"; 
+  // const API_BASE = "http://localhost:5000/api"; 
+    const  API_BASE = 'https://backendrepoo-production.up.railway.app/api/classes';
 
   useEffect(() => {
     const fetchData = async () => {
