@@ -11,7 +11,7 @@ export default function GeneratePaper() {
   const [selectedClassName, setSelectedClassName] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
   const [selectedChapters, setSelectedChapters] = useState<any[]>([]);
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]); // Topics state
   const [showPreview, setShowPreview] = useState(false);
   const [step, setStep] = useState(1);
   
@@ -20,14 +20,14 @@ export default function GeneratePaper() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // const API_BASE = "http://localhost:5000/api"; 
-    const  API_BASE = 'https://backendrepoo-production.up.railway.app/api/classes';
+    const API_BASE = "https://backendrepoo-production.up.railway.app/api";
+ 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_BASE}`); 
+        const res = await axios.get(`${API_BASE}/classes`); 
         let rawData = res.data;
         let allDataFromDB = Array.isArray(rawData) ? (rawData[0]?.classes || rawData) : (rawData.classes || []);
 
@@ -66,7 +66,12 @@ export default function GeneratePaper() {
     const chName = chapterObj.name || chapterObj;
     setSelectedChapters(prev => {
       const isExist = prev.find(c => (c.name || c) === chName);
-      if (isExist) return prev.filter(c => (c.name || c) !== chName);
+      if (isExist) {
+        // Agar chapter unselect ho raha hai, to uske topics bhi unselect kar do
+        const chapterTopics = chapterObj.topics?.map((t: any) => typeof t === 'string' ? t : t.name) || [];
+        setSelectedTopics(topics => topics.filter(t => !chapterTopics.includes(t)));
+        return prev.filter(c => (c.name || c) !== chName);
+      }
       return [...prev, chapterObj];
     });
   };
@@ -77,12 +82,14 @@ export default function GeneratePaper() {
     );
   };
 
+  // --- PREVIEW RENDER WITH TOPICS ---
   if (showPreview) {
     return (
       <PaperPreview 
         className={selectedClassName || ''}
         subject={selectedSubject}
         chapters={selectedChapters.map(c => c.name || c)}
+        topics={selectedTopics} 
         onClose={() => setShowPreview(false)}
       />
     );
@@ -115,7 +122,7 @@ export default function GeneratePaper() {
              <div className="h-full flex items-center justify-center font-black text-slate-300 animate-pulse uppercase tracking-widest">Loading...</div>
           ) : (
             <>
-              {/* STEP 1: CLASSES (Your Specific Style) */}
+              {/* STEP 1: CLASSES */}
               {step === 1 && (
                 <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
                   <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight">Select Class</h2>
@@ -167,15 +174,15 @@ export default function GeneratePaper() {
                 </div>
               )}
 
-              {/* STEP 3: COMPACT CHAPTERS & TOPICS */}
+              {/* STEP 3: CHAPTERS & TOPICS */}
               {step === 3 && (
                 <div className="max-w-6xl mx-auto animate-in fade-in duration-500 pb-10">
-                  <div className="sticky -top-12 z-20 bg-slate-100 backdrop-blur-md py-4 mb-6 border-b border-slate-200 flex justify-between items-center px-2">
+                  <div className="sticky top-0 z-20 bg-[#f8fafc] py-4 mb-6 border-b border-slate-200 flex justify-between items-center">
                     <div>
                       <h2 className="text-2xl font-black text-slate-800 tracking-tight">Select Chapters & Topics</h2>
                       <div className="flex gap-3 mt-1 text-[10px] font-bold uppercase">
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">Selected Chapters: {selectedChapters.length}</span>
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded">Selected Topics: {selectedTopics.length}</span>
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">Chapters: {selectedChapters.length}</span>
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded">Topics: {selectedTopics.length}</span>
                       </div>
                     </div>
                     <button 
@@ -187,36 +194,36 @@ export default function GeneratePaper() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {selectedSubject.chapters.map((chapter: any, idx: number) => {
                       const chapterName = chapter.name || chapter;
                       const chapterTopics = chapter.topics || [];
                       const isChapterSelected = selectedChapters.find(c => (c.name || c) === chapterName);
 
                       return (
-                        <div key={idx} className={`rounded-xl border transition-all overflow-hidden ${isChapterSelected ? 'border-blue-400 bg-white shadow-md' : 'border-slate-200 bg-slate-50/50 opacity-90'}`}>
+                        <div key={idx} className={`rounded-2xl border transition-all overflow-hidden ${isChapterSelected ? 'border-blue-400 bg-white shadow-lg' : 'border-slate-200 bg-white/50'}`}>
                           <div 
                             onClick={() => toggleChapter(chapter)}
-                            className={`p-4 cursor-pointer flex items-center justify-between border-b ${isChapterSelected ? 'bg-blue-50/30 border-blue-100' : 'border-transparent'}`}
+                            className={`p-5 cursor-pointer flex items-center justify-between border-b ${isChapterSelected ? 'bg-blue-50/50 border-blue-100' : 'border-transparent'}`}
                           >
-                            <div className="flex items-center gap-3">
-                              <span className={`p-2 rounded-lg flex items-center justify-center font-bold text-xs ${isChapterSelected ? 'bg-blue-600 text-white' : 'bg-white text-slate-400 border border-slate-200'}`}>
-                                 Chapter {idx + 1}
+                            <div className="flex items-center gap-4">
+                              <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${isChapterSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                 {idx + 1}
                               </span>
-                              <h3 className={`text-sm font-bold  w-auto ${isChapterSelected ? 'text-slate-900' : 'text-slate-700'}`}>
+                              <h3 className={`font-bold ${isChapterSelected ? 'text-slate-900' : 'text-slate-500'}`}>
                                 {chapterName}
                               </h3>
                             </div>
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isChapterSelected ? 'bg-blue-600 border-blue-600 shadow-sm' : 'border-slate-300'}`}>
-                              {isChapterSelected && <FaCheckCircle className="text-white text-[8px]" />}
+                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isChapterSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300'}`}>
+                              {isChapterSelected && <FaCheckCircle className="text-white text-xs" />}
                             </div>
                           </div>
 
-                          <div className="p-3 bg-white">
-                            <div className="flex  gap-1">
+                          {/* Topics List with flex-wrap for better UI */}
+                          <div className="p-4 bg-white/30">
+                            <div className="flex flex-wrap gap-2">
                               {chapterTopics.length > 0 ? chapterTopics.map((topic: any, tIdx: number) => {
                                 const topicName = typeof topic === 'string' ? topic : topic.name;
-                                const topicId = topic.id || `${idx + 1}.${tIdx + 1}`;
                                 const isTopicSelected = selectedTopics.includes(topicName);
 
                                 return (
@@ -227,17 +234,14 @@ export default function GeneratePaper() {
                                       if (!isChapterSelected) toggleChapter(chapter);
                                       toggleTopic(topicName);
                                     }}
-                                    className={`flex w-65 items-center gap-3 p-2 rounded-lg cursor-pointer border transition-all ${isTopicSelected ? 'border-green-200 bg-green-50/50 text-green-800 shadow-sm' : 'border-transparent bg-slate-200 text-slate-500 hover:bg-slate-100'}`}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer border text-[11px] font-bold transition-all ${isTopicSelected ? 'border-green-500 bg-green-50 text-green-700 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
                                   >
-                                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${isTopicSelected ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-400 border-slate-200 shadow-sm'}`}>
-                                      ID: {topicId}
-                                    </span>
-                                    <span className="text-xs font-medium truncate">{topicName}</span>
-                                    {isTopicSelected && <FaCheckCircle className="ml-auto text-green-600 text-[10px]" />}
+                                    <span>{topicName}</span>
+                                    {isTopicSelected && <FaCheckCircle className="text-green-600" />}
                                   </div>
                                 );
                               }) : (
-                                <div className="text-[10px] text-slate-400 italic py-1 px-2">No specific topics available.</div>
+                                <div className="text-[10px] text-slate-400 italic">No topics available.</div>
                               )}
                             </div>
                           </div>
