@@ -17,7 +17,6 @@ const WhiteAdminPanel = () => {
   const [bulkLoading, setBulkLoading] = useState(false);
   const [type, setType] = useState("mcq"); 
   const [inputMode, setInputMode] = useState<"manual" | "excel">("manual");
-
   const [allClassesData, setAllClassesData] = useState<any[]>([]);
   const [isNewTopic, setIsNewTopic] = useState(false);
 
@@ -32,7 +31,7 @@ const WhiteAdminPanel = () => {
     answer: "", 
   });
 
-  const API_URL = "https://backendrepoo-production.up.railway.app/api";
+  const API_URL = "https://backendrepoo-production.up.railway.app/api/classes"; 
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -44,98 +43,30 @@ const WhiteAdminPanel = () => {
 
   const fetchDB = async () => {
     try {
-      const res = await axios.get(`${API_URL}/classes`);
-      // Agar backend se direct array aa raha ho ya [ { classes: [] } ] format mein
-      const data = res.data;
-      if (Array.isArray(data)) {
-        setAllClassesData(data);
+      const res = await axios.get(`${API_URL}`);
+      if (Array.isArray(res.data)) {
+        setAllClassesData(res.data);
       }
     } catch (err) {
-      toast.error("Cloud Database Offline", { icon: '☁️' });
+      toast.error("Database Connection Error");
     }
   };
 
-  // --- HIERARCHY LOGIC FIX ---
-  // Agar allClassesData[0].classes exists kare to wo le, warna direct array check kare
+  // --- HIERARCHY LOGIC ---
   const classesList = allClassesData[0]?.classes || (Array.isArray(allClassesData) ? allClassesData : []);
-  
   const selectedClassObj = classesList.find((c: any) => c.id === formData.classId);
   const availableSubjects = selectedClassObj?.subjects || [];
-  
   const selectedSubjectObj = availableSubjects.find((s: any) => s.name === formData.subjectName);
   const availableChapters = (selectedSubjectObj?.chapters || []).map((ch: any) => typeof ch === 'string' ? { name: ch } : ch);
-  
   const selectedChapterObj = availableChapters.find((ch: any) => ch.name === formData.chapterName);
-  const availableTopics = selectedChapterObj?.topics || [];
+  const availableTopics = selectedChapterObj?.topics?.map((t: any) => t.name) || [];
 
   const isPathSelected = formData.classId !== "" && formData.subjectName !== "" && formData.chapterName !== "";
 
-  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!formData.topic && !isNewTopic) {
-        toast.error("Please select or create a Topic first!");
-        return;
-    }
-
-    setBulkLoading(true);
-    const reader = new FileReader();
-
-    reader.onload = async (evt) => {
-      try {
-        const bstr = evt.target?.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const data: any[] = XLSX.utils.sheet_to_json(ws);
-
-        if (data.length === 0) throw new Error("File is empty!");
-
-        const firstRow = data[0];
-        if (type === 'mcq') {
-          const hasOptions = 'question' in firstRow && 'A' in firstRow && 'B' in firstRow && 'C' in firstRow && 'D' in firstRow && 'answer' in firstRow;
-          if (!hasOptions) {
-            toast.error("Invalid MCQ Format! Need: question, A, B, C, D, answer");
-            setBulkLoading(false);
-            return;
-          }
-        } else {
-            if (!('question' in firstRow && 'answer' in firstRow)) {
-                toast.error("Invalid Format! Need: question, answer");
-                setBulkLoading(false);
-                return;
-            }
-        }
-
-        toast.loading(`Injecting ${data.length} items...`, { id: 'bulk' });
-
-        for (const row of data) {
-          await axios.post(`${API_URL}/add-question`, {
-            ...formData,
-            type,
-            newQuestion: {
-              q_no: Date.now() + Math.random(),
-              question: row.question,
-              options: type === 'mcq' ? { A: row.A, B: row.B, C: row.C, D: row.D } : undefined,
-              answer: String(row.answer || ""),
-              topic: formData.topic || "General"
-            }
-          });
-        }
-        toast.success("Database Synced!", { id: 'bulk' });
-        fetchDB();
-      } catch (err: any) {
-        toast.error(err.message || "Upload Failed");
-      } finally {
-        setBulkLoading(false);
-        e.target.value = "";
-      }
-    };
-    reader.readAsBinaryString(file);
-  };
-
   const handleSaveManual = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isPathSelected) return toast.error("Please select Class, Subject & Chapter first!");
+    if (!isPathSelected) return toast.error("Select Class, Subject & Chapter!");
+    if (!formData.topic) return toast.error("Please provide a Topic!");
     
     setLoading(true);
     try {
@@ -147,16 +78,56 @@ const WhiteAdminPanel = () => {
           question: formData.question,
           options: type === 'mcq' ? formData.options : undefined,
           answer: formData.answer,
-          topic: formData.topic || "General"
+          topic: formData.topic
         }
       });
-      toast.success("Saved Successfully!");
+      toast.success("Saved in Database!");
+      // Reset only question specific fields
       setFormData({ ...formData, question: "", answer: "", options: { A: "", B: "", C: "", D: "" } });
+      setIsNewTopic(false);
+      fetchDB(); // Refresh UI to see new topic in dropdown
     } catch (err) {
-      toast.error("Push failed.");
+      toast.error("Save failed.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !formData.topic) return toast.error("Select topic first!");
+
+    setBulkLoading(true);
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const data: any[] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        
+        toast.loading(`Importing ${data.length} items...`, { id: 'bulk' });
+        for (const row of data) {
+          await axios.post(`${API_URL}/add-question`, {
+            ...formData,
+            type,
+            newQuestion: {
+              q_no: Date.now() + Math.random(),
+              question: row.question,
+              options: type === 'mcq' ? { A: row.A, B: row.B, C: row.C, D: row.D } : undefined,
+              answer: String(row.answer || ""),
+              topic: formData.topic
+            }
+          });
+        }
+        toast.success("Bulk Upload Complete!", { id: 'bulk' });
+        fetchDB();
+      } catch (err) {
+        toast.error("Upload failed");
+      } finally {
+        setBulkLoading(false);
+      }
+    };
+    reader.readAsBinaryString(file);
   };
 
   return (
@@ -167,52 +138,43 @@ const WhiteAdminPanel = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header />
 
-        <main className="flex-1 overflow-y-auto bg-[#F8FAFC]/60 p-3 md:p-8">
-          <div className="max-w-6xl mx-auto space-y-10">
+        <main className="flex-1 overflow-y-auto bg-[#F8FAFC]/60 p-4 md:p-8">
+          <div className="max-w-6xl mx-auto space-y-8">
             
-            {/* TYPE SELECTOR */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div className="flex bg-white/80 backdrop-blur-md p-1.5 rounded-md shadow-sm border border-slate-200">
-                {['mcq', 'short', 'long'].map(t => (
-                  <button 
-                    key={t} onClick={() => setType(t)}
-                    className={`px-8 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${type === t ? 'bg-slate-900 text-white shadow-xl scale-105' : 'text-slate-400 hover:text-slate-600'}`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
+            {/* 1. TYPE SELECTOR */}
+            <div className="flex bg-white w-fit p-1.5 rounded-xl shadow-sm border border-slate-200">
+              {['mcq', 'short', 'long'].map(t => (
+                <button 
+                  key={t} onClick={() => setType(t)}
+                  className={`px-8 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${type === t ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  {t}
+                </button>
+              ))}
             </div>
 
-            {/* STEP 1: HIERARCHY BOX */}
-            <div className="bg-white rounded-xl p-6 shadow-2xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 text-slate-900"><Layers size={140} /></div>
-              
-              <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                <div className="col-span-full flex items-center gap-3 mb-2">
-                  <div className="h-6 w-1.5 bg-blue-600 rounded-full"></div>
-                  <span className="text-[15px] font-black uppercase tracking-widest text-slate-900">Select and Add Data</span>
-                </div>
-
+            {/* 2. HIERARCHY SELECTOR */}
+            <div className="bg-white rounded-2xl p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 ml-1"><Tag size={12}/> Class</label>
-                  <select value={formData.classId} onChange={(e) => setFormData({...formData, classId: e.target.value, subjectName: "", chapterName: ""})} className="w-full bg-slate-50 p-4 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-sm">
+                  <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Class</label>
+                  <select value={formData.classId} onChange={(e) => setFormData({...formData, classId: e.target.value, subjectName: "", chapterName: "", topic: ""})} className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100 focus:border-blue-500 outline-none text-sm font-semibold">
                     <option value="">Select Class</option>
                     {classesList.map((c: any) => <option key={c.id} value={c.id}>{c.title || c.id}</option>)}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 ml-1"><BookOpen size={12}/> Subject</label>
-                  <select disabled={!formData.classId} value={formData.subjectName} onChange={(e) => setFormData({...formData, subjectName: e.target.value, chapterName: ""})} className="w-full bg-slate-50 p-4 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-sm disabled:opacity-40">
+                  <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Subject</label>
+                  <select disabled={!formData.classId} value={formData.subjectName} onChange={(e) => setFormData({...formData, subjectName: e.target.value, chapterName: "", topic: ""})} className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100 focus:border-blue-500 outline-none text-sm font-semibold disabled:opacity-50">
                     <option value="">Select Subject</option>
                     {availableSubjects.map((s: any) => <option key={s.name} value={s.name}>{s.name}</option>)}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 ml-1"><Layers size={12}/> Chapter</label>
-                  <select disabled={!formData.subjectName} value={formData.chapterName} onChange={(e) => setFormData({...formData, chapterName: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-sm disabled:opacity-40">
+                  <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Chapter</label>
+                  <select disabled={!formData.subjectName} value={formData.chapterName} onChange={(e) => setFormData({...formData, chapterName: e.target.value, topic: ""})} className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100 focus:border-blue-500 outline-none text-sm font-semibold disabled:opacity-50">
                     <option value="">Select Chapter</option>
                     {availableChapters.map((ch: any, i: number) => <option key={i} value={ch.name}>{ch.name}</option>)}
                   </select>
@@ -220,22 +182,24 @@ const WhiteAdminPanel = () => {
 
                 <div className="space-y-2">
                   <div className="flex justify-between px-1">
-                    <label className="text-[10px] font-black uppercase text-slate-400">Topic Area</label>
-                    <button onClick={() => setIsNewTopic(!isNewTopic)} className="text-[9px] font-black text-blue-600 uppercase hover:underline">{isNewTopic ? 'Select' : 'Create+'}</button>
+                    <label className="text-[10px] font-bold uppercase text-slate-400">Topic</label>
+                    <button type="button" onClick={() => { setIsNewTopic(!isNewTopic); setFormData({...formData, topic: ""}); }} className="text-[9px] font-black text-blue-600 hover:underline">
+                      {isNewTopic ? 'Cancel' : 'Create+'}
+                    </button>
                   </div>
                   {isNewTopic ? (
-                    <input type="text" placeholder="Topic Name..." value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-blue-50/50 p-4 rounded-2xl border-2 border-blue-200 outline-none font-bold text-sm" />
+                    <input autoFocus type="text" placeholder="New Topic..." value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-blue-50/50 p-3 rounded-xl border border-blue-200 outline-none text-sm font-bold text-blue-700" />
                   ) : (
-                    <select value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl border-2 border-transparent focus:border-blue-500 transition-all outline-none font-bold text-sm">
-                      <option value="">General</option>
-                      {availableTopics?.map((t: string, i: number) => <option key={i} value={t}>{t}</option>)}
+                    <select disabled={!formData.chapterName} value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100 focus:border-blue-500 outline-none text-sm font-semibold disabled:opacity-50">
+                      <option value="">Choose Topic</option>
+                      {availableTopics.map((t: string, i: number) => <option key={i} value={t}>{t}</option>)}
                     </select>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 ml-1"><Info size={12}/> Section</label>
-                  <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-indigo-50/50 text-indigo-700 p-4 rounded-2xl border-2 border-transparent focus:border-indigo-500 focus:bg-white transition-all outline-none font-bold text-sm">
+                  <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Section</label>
+                  <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-indigo-50/50 text-indigo-700 p-3 rounded-xl border border-indigo-100 outline-none text-sm font-bold">
                     <option value="Exercise Questions">Exercise</option>
                     <option value="Additional Questions">Additional</option>
                     <option value="Pastpapers Questions">Pastpapers</option>
@@ -244,45 +208,31 @@ const WhiteAdminPanel = () => {
               </div>
             </div>
 
-            {/* STEP 2: MODE SELECTOR */}
-            <div className="flex p-2 bg-slate-200/40 backdrop-blur-sm rounded-md gap-3 max-w-md shadow-inner">
-              <button onClick={() => setInputMode("manual")} className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-md text-[11px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${inputMode === "manual" ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-500'}`}>
-                Manual Type
-              </button>
-              <button onClick={() => setInputMode("excel")} className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-md text-[11px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${inputMode === "excel" ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-500'}`}>
-                Upload Excel File
-              </button>
+            {/* 3. INPUT MODE */}
+            <div className="flex gap-4 p-1 bg-slate-200/50 rounded-xl w-fit">
+              <button onClick={() => setInputMode("manual")} className={`px-6 py-2 rounded-lg text-xs font-bold uppercase ${inputMode === "manual" ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>Manual</button>
+              <button onClick={() => setInputMode("excel")} className={`px-6 py-2 rounded-lg text-xs font-bold uppercase ${inputMode === "excel" ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>Excel Import</button>
             </div>
 
-            {/* STEP 3: WORKSPACE */}
-            <div className={`min-h-[550px] mb-2 transition-all duration-500 relative ${!isPathSelected ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
-              {!isPathSelected && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/10 backdrop-blur-[1px]">
-                   <div className="bg-slate-900 text-white px-6 py-2 rounded-full text-xs font-bold animate-bounce uppercase">
-                     ⚠️ Please select Class, Subject & Chapter
-                   </div>
-                </div>
-              )}
-
+            {/* 4. WORKSPACE */}
+            <div className={`${!isPathSelected ? 'opacity-30 pointer-events-none' : 'opacity-100'} transition-all`}>
               {inputMode === "manual" ? (
-                <form onSubmit={handleSaveManual} className="bg-white rounded-md p-12 shadow-2xl shadow-slate-200/70 border border-slate-100 space-y-10">
-                  <div className="space-y-2">
-                    <textarea required rows={1} value={formData.question} onChange={(e) => setFormData({...formData, question: e.target.value})} className="w-full bg-slate-100 p-4 rounded-md border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-medium text-md resize-none shadow-inner" placeholder="Enter question statement here..."></textarea>
-                  </div>
-
+                <form onSubmit={handleSaveManual} className="bg-white rounded-2xl p-8 shadow-xl border border-slate-100 space-y-6">
+                  <textarea required rows={2} value={formData.question} onChange={(e) => setFormData({...formData, question: e.target.value})} className="w-full bg-slate-50 p-4 rounded-xl border border-transparent focus:border-blue-500 outline-none font-medium" placeholder="Type question statement..."></textarea>
+                  
                   {type === 'mcq' && (
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {['A', 'B', 'C', 'D'].map(o => (
-                        <div key={o} className="relative group">
-                          <span className="absolute left-7 top-1/2 -translate-y-1/2 font-black text-slate-300 group-focus-within:text-blue-600 text-lg">{o}</span>
-                          <input type="text" placeholder={`Option ${o}`} value={(formData.options as any)[o]} onChange={(e) => setFormData({...formData, options: {...formData.options, [o]: e.target.value}})} className="w-full bg-white border-2 border-slate-100 p-3 pl-13 rounded-md outline-none focus:border-blue-500 transition-all text-lg" />
+                        <div key={o} className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                          <span className="w-8 h-8 flex items-center justify-center bg-white rounded-lg font-black text-slate-400">{o}</span>
+                          <input type="text" placeholder={`Option ${o}`} value={(formData.options as any)[o]} onChange={(e) => setFormData({...formData, options: {...formData.options, [o]: e.target.value}})} className="bg-transparent flex-1 outline-none text-sm font-medium" />
                         </div>
                       ))}
-                      <div className="md:col-span-2 space-y-4">
-                        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ml-3">Select Correct Answer</label>
-                        <div className="flex gap-4">
+                      <div className="col-span-full pt-4">
+                        <p className="text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-widest">Correct Answer</p>
+                        <div className="flex gap-3">
                           {['A','B','C','D'].map(a => (
-                            <button key={a} type="button" onClick={() => setFormData({...formData, answer: a})} className={`flex-1 py-3 rounded-md border font-black text-xl transition-all ${formData.answer === a ? 'bg-blue-600 text-white shadow-2xl scale-105' : 'bg-slate-50 text-slate-300'}`}>{a}</button>
+                            <button key={a} type="button" onClick={() => setFormData({...formData, answer: a})} className={`flex-1 py-3 rounded-xl font-black transition-all ${formData.answer === a ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400'}`}>{a}</button>
                           ))}
                         </div>
                       </div>
@@ -290,32 +240,23 @@ const WhiteAdminPanel = () => {
                   )}
 
                   {type !== 'mcq' && (
-                    <div className="space-y-4">
-                      <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ml-3">Reference Key / Answer</label>
-                      <textarea rows={4} value={formData.answer} onChange={(e) => setFormData({...formData, answer: e.target.value})} className="w-full bg-slate-100 p-6 rounded-md outline-none font-medium text-lg shadow-inner" placeholder="Provide the solution..."></textarea>
-                    </div>
+                    <textarea rows={4} value={formData.answer} onChange={(e) => setFormData({...formData, answer: e.target.value})} className="w-full bg-slate-50 p-4 rounded-xl border border-transparent focus:border-blue-500 outline-none font-medium" placeholder="Solution / Reference Key..."></textarea>
                   )}
 
-                  <button disabled={loading} className="group w-full bg-slate-900 text-white p-3 rounded-md font-black uppercase text-lg hover:bg-slate-700 transition-all shadow-2xl flex items-center justify-center gap-5 active:scale-[0.98]">
-                    {loading ? <Loader2 className="animate-spin" /> : <> <DatabaseZap size={22} className="text-blue-400" /> Store in Database <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" /></>}
+                  <button disabled={loading} className="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase flex items-center justify-center gap-3 hover:bg-slate-800 transition-all">
+                    {loading ? <Loader2 className="animate-spin" /> : <><DatabaseZap size={18} /> Store Data</>}
                   </button>
                 </form>
               ) : (
-                <div className="bg-white rounded-md p-5 shadow-2xl shadow-slate-200/70 border border-slate-100 flex flex-col items-center justify-center space-y-10">
-                  <div className="w-40 h-40 bg-green-50 rounded-[3rem] flex items-center justify-center text-green-600 shadow-inner group relative">
-                     <UploadCloud size={60} className="relative z-10" />
+                <div className="bg-white rounded-2xl p-16 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center space-y-6">
+                  <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><UploadCloud size={32} /></div>
+                  <div className="text-center">
+                    <p className="font-bold">Import Excel for "{formData.topic || 'New Topic'}"</p>
+                    <p className="text-xs text-slate-400 mt-1">Format: question, A, B, C, D, answer (for MCQ)</p>
                   </div>
-                  <div className="text-center space-y-3">
-                    <p className="text-slate-400 text-[13px] uppercase bg-slate-50 px-6 py-2 rounded-full flex items-center gap-2">
-                       <AlertCircle size={14} className="text-orange-400"/> 
-                       Required Cols: {type === 'mcq' ? "question, A, B, C, D, answer" : "question, answer"}
-                    </p>
-                    <p className="text-[10px] text-blue-500 font-bold uppercase italic">Topic will be set as: "{formData.topic || 'General'}"</p>
-                  </div>
-                  <input type="file" id="bulk-input" className="hidden" accept=".xlsx, .xls" onChange={handleExcelUpload} disabled={bulkLoading} />
-                  <label htmlFor="bulk-input" className="bg-slate-900 text-white px-10 py-4 rounded-md uppercase cursor-pointer hover:bg-slate-700 transition-all shadow-2xl flex items-center gap-4 group">
-                    {bulkLoading ? <Loader2 className="animate-spin" /> : <FileSpreadsheet size={24} />}
-                    {bulkLoading ? "Checking File..." : `Import ${type.toUpperCase()} File`}
+                  <input type="file" id="xl-input" className="hidden" accept=".xlsx, .xls" onChange={handleExcelUpload} />
+                  <label htmlFor="xl-input" className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold cursor-pointer hover:bg-slate-800">
+                    {bulkLoading ? "Processing..." : "Choose File"}
                   </label>
                 </div>
               )}
