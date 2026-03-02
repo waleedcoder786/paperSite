@@ -269,6 +269,9 @@ const ChapterAccordion = ({ chapter, index, isSelected, selectedTopics, onToggle
   const chapterName = chapter.name || chapter;
   const topics = chapter.topics || [];
 
+  console.log(topics);
+  
+
   return (
     <div className={`rounded-2xl border transition-all ${isSelected ? 'border-blue-400 bg-white shadow-md' : 'border-slate-200 bg-white/50'}`}>
       <div onClick={onToggleChapter} className={`p-4 cursor-pointer flex items-center justify-between ${isSelected ? 'bg-blue-50/50' : ''}`}>
@@ -283,9 +286,10 @@ const ChapterAccordion = ({ chapter, index, isSelected, selectedTopics, onToggle
         </div>
       </div>
       {isSelected && (
-        <div className="p-4 pt-0 flex flex-wrap gap-2">
+        <div className="p-4 pt-2 flex flex-wrap gap-2">
           {topics.map((topic: any, tIdx: number) => {
             const tName = typeof topic === 'string' ? topic : topic.name;
+            const tid = typeof topic === 'string' ? topic : topic.topicNum;
             const isTSelected = selectedTopics.includes(tName);
             return (
               <button
@@ -293,7 +297,7 @@ const ChapterAccordion = ({ chapter, index, isSelected, selectedTopics, onToggle
                 onClick={(e) => { e.stopPropagation(); onToggleTopic(tName); }}
                 className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold transition-all ${isTSelected ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-100 bg-slate-50 text-slate-400'}`}
               >
-                {tName}
+               {tid} {tName}
               </button>
             );
           })}
