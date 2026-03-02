@@ -16,6 +16,9 @@ function Page() {
     role: "",
   });
 
+  // const API_BASE = "https://backendrepoo-production.up.railway.app/api";
+  const API_BASE = "http://localhost:5000";
+
   const pathname = usePathname().split("/").pop()?.replace(/-/g, " ");
 
   const [passwords, setPasswords] = useState({
@@ -50,10 +53,9 @@ function Page() {
           return;
         }
       }
-
-      const searchRes = await axios.get(
-        `https://backendrepoo-production.up.railway.app/api/users?email=${user.email}`
-      );
+        const searchRes = await axios.get(
+          `${API_BASE}/users?email=${user.email}`
+        );
 
       if (searchRes.data.length > 0) {
         const dbUser = searchRes.data[0];
@@ -73,7 +75,7 @@ function Page() {
         };
 
         const response = await axios.put(
-          `https://backendrepoo-production.up.railway.app/api/users/${userId}`,
+          `${API_BASE}/users/${userId}`,
           updatedData
         );
 

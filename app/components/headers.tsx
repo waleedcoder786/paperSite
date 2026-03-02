@@ -27,6 +27,10 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
   const displaySchoolLogo = userData?.logo || info?.logo || styles?.logoUrl || "";
   const displaySchoolAddress = userData?.address || info?.address || "";
 
+  console.log("displaySchoolName:", info?.schoolName, userData?.schoolName, displaySchoolName);
+  
+
+
   const Logo = () => (
     <div onClick={onChangeLogo} className="cursor-pointer group relative print:opacity-100 shrink-0">
       <img src={displaySchoolLogo} alt="logo" className="w-20 h-20 object-contain" />
@@ -38,6 +42,8 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
 
   const fieldLabel = "font-bold text-[12px] uppercase";
   const displayDate = info?.paperDate || info?.date || "___/___/202__";
+  const displayClass = info?.className || info?.class || "________";
+  const displaySubject = info?.subject || "________";
   const displayTime = info?.paperTime || info?.timeAllowed || "_______";
 
   switch (type) {
@@ -59,7 +65,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
                 <td className="border border-black bg-black text-white p-1 font-bold w-20">Roll No.</td>
                 <td className="border border-black p-1 w-32"></td>
                 <td className="border border-black bg-black text-white p-1 font-bold w-20">Class:</td>
-                <td className="border border-black p-1 w-24 font-bold">{info?.class}</td>
+                <td className="border border-black p-1 w-24 font-bold">{displayClass}</td>
               </tr>
               <tr>
                 <td className="border border-black bg-black text-white p-1 font-bold">Subject:</td>
@@ -96,7 +102,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
           </div>
           <div className="bg-black text-white flex justify-between px-4 py-2 font-bold uppercase text-[11px]">
             <span>Subject: {info?.subject}</span>
-            <span>Class: {info?.class}</span>
+            <span>Class: {displayClass}</span>
             <span>Total Marks: {info?.totalMarks}</span>
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4 text-[12px]">
@@ -119,7 +125,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
             </div>
           </div>
           <div className="flex justify-between items-end font-bold text-sm uppercase px-2">
-            <div className="flex gap-2"><span>CLASS:</span><span className="border-b border-black min-w-[80px] text-center">{info?.class}</span></div>
+            <div className="flex gap-2"><span>CLASS:</span><span className="border-b border-black min-w-[80px] text-center">{displayClass}</span></div>
             <div className="flex gap-2 underline decoration-double underline-offset-4 decoration-2"><span>SUBJECT:</span><span>{info?.subject}</span></div>
             <div className="flex gap-2"><span>TOTAL MARKS:</span><span className="border-b border-black min-w-[50px] text-center">{info?.totalMarks}</span></div>
           </div>
@@ -141,7 +147,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
                 <p className="text-[10px] font-bold mt-1">Time: {displayTime}</p>
              </div>
              <div className="text-right space-y-3 text-[11px]">
-                <p><b>CLASS:</b> {info?.class}</p>
+                <p><b>CLASS:</b> {displayClass}</p>
                 <p><b>SUBJECT:</b> {info?.subject}</p>
              </div>
           </div>
@@ -160,7 +166,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
              <div className="text-center">
                 <h1 className="text-2xl font-black uppercase">{displaySchoolName}</h1>
                 <p className="text-[10px] font-bold">{displaySchoolAddress}</p>
-                <p className="text-sm italic underline mt-1">Class: {info?.class} | Subject: {info?.subject}</p>
+                <p className="text-sm italic underline mt-1">Class: {displayClass} | Subject: {info?.subject}</p>
              </div>
              <div className="text-right text-[10px] font-bold leading-relaxed">
                 <p>Date: {displayDate}</p>
@@ -203,7 +209,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
             <div className="flex justify-between text-[11px] font-bold uppercase">
                 <span>Name: _________________</span>
                 <span>Roll #: _________</span>
-                <span>Class: {info?.class}</span>
+                <span>Class: {displayClass}</span>
                 <span>Subject: {info?.subject}</span>
             </div>
           </div>
@@ -240,7 +246,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
              <div className="w-2/3 pl-4 flex flex-col justify-center">
                 <h1 className="text-3xl font-black text-right uppercase">{displaySchoolName}</h1>
                 <div className="mt-4 flex justify-end gap-6 text-sm font-bold">
-                   <p className="bg-black text-white px-2">CLASS: {info?.class}</p>
+                   <p className="bg-black text-white px-2">CLASS: {displayClass}</p>
                    <p className="border-2 border-black px-2">SUBJECT: {info?.subject}</p>
                    <p className="border-2 border-black px-2">MARKS: {info?.totalMarks}</p>
                 </div>
@@ -256,7 +262,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
                    <h1 className="text-2xl font-bold uppercase underline decoration-double underline-offset-4">{displaySchoolName}</h1>
                    <p className="text-[10px] font-bold mt-1 uppercase">{displaySchoolAddress}</p>
                    <div className="flex gap-10 mt-4 text-[12px] font-bold">
-                      <p>CLASS: {info?.class}</p>
+                      <p>CLASS: {displayClass}</p>
                       <p>SUBJECT: {info?.subject}</p>
                       <p>DATE: {displayDate}</p>
                       <p>TIME: {displayTime}</p>
@@ -293,7 +299,7 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
                 <td className="border border-black p-2 bg-gray-50 font-bold">Subject</td>
                 <td className="border border-black p-2">{info?.subject}</td>
                 <td className="border border-black p-2 bg-gray-50 font-bold">Class / Date</td>
-                <td className="border border-black p-2">{info?.class} / {displayDate}</td>
+                <td className="border border-black p-2">{displayClass} / {displayDate}</td>
               </tr>
               <tr>
                 <td className="border border-black p-2 bg-gray-50 font-bold">Total Marks</td>

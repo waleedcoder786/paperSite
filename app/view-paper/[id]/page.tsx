@@ -5,7 +5,8 @@ import Link from "next/link";
 import axios from "axios";
 import { PaperHeader } from "../../components/headers";
 
-const API_BASE = "https://backendrepoo-production.up.railway.app/api";
+// const API_BASE = "https://backendrepoo-production.up.railway.app/api";
+const API_BASE = "http://localhost:5000/api"; 
 
 // --- Types for better DX ---
 interface Question {
@@ -203,11 +204,6 @@ export default function ViewPaperPage({ params }: { params: Promise<{ id: string
                     </div>
                   )
                 ))}
-              </div>
-
-              <div className="mt-24 pt-4 border-t flex justify-between text-[9px] uppercase font-black opacity-40" style={{ borderColor: styles.textColor }}>
-                  <span>Generated via AI Exam Suite</span>
-                  <span>{paperData.info?.schoolName || 'Institute Copy'}</span>
               </div>
             </div>
           )}

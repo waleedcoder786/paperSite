@@ -18,11 +18,13 @@ import Link from "next/link";
 import axios from "axios";
 import { PaperHeader } from "../../components/headers"; 
 
-const API_BASE = "https://backendrepoo-production.up.railway.app/api";
+// const API_BASE = "https://backendrepoo-production.up.railway.app/api";
+const API_BASE = "http://localhost:5000/api"; 
 
 // --- HELPER COMPONENT: Auto-Resizing Textarea ---
 const AutoResizeTextarea = ({ value, onChange, className, style, placeholder }: any) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+console.log(style);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -180,6 +182,8 @@ export default function EditPaperPage({ params }: { params: Promise<{ id: string
     { id: 'modern-bar ', name: 'Layout 10' },
   ];
 
+  // console.log(paperData.className);
+  
   return (
     <div className="relative flex h-screen w-screen bg-slate-100 overflow-hidden font-sans text-black">
       {showToast && (
@@ -384,7 +388,7 @@ export default function EditPaperPage({ params }: { params: Promise<{ id: string
             <div className="relative z-10">
               <PaperHeader 
                 type={styles.layoutType} 
-                info={{ ...paperData.info, paperDate: paperData.paperDate, paperTime: paperData.paperTime }} 
+                info={{ ...paperData.info, class:paperData.className, subject: paperData.subject, paperDate: paperData.paperDate, paperTime: paperData.paperTime }} 
                 styles={styles} 
                 onChangeLogo={()=>{}} 
               />

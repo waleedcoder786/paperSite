@@ -27,12 +27,1602 @@
           "image": "https://media.geeksforgeeks.org/wp-content/uploads/20250127131719608492/Computer-Science-Core-.webp",
           "color": "bg-blue-600",
           "chapters": [
+            {
+              "name": "Software Development Life Cycle (SDLC)",
+              "MCQs": {
+                "Exercise Questions": [
+                  {
+                    "q_no": 1,
+                    "question": "Primary purpose of the Software Development Life Cycle (SDLC) is to:",
+                    "options": {
+                      "A": "Design websites",
+                      "B": "Deliver high-quality software within time and cost estimates",
+                      "C": "Manage database systems",
+                      "D": "Create hardware components"
+                    }
+                  },
+                  {
+                    "q_no": 2,
+                    "question": "A type of requirement specifies system performance:",
+                    "options": {
+                      "A": "Functional Requirements",
+                      "B": "Non-Functional Requirements",
+                      "C": "Technical Requirements",
+                      "D": "Operational Requirements"
+                    }
+                  },
+                  {
+                    "q_no": 3,
+                    "question": "Role of a framework in the context of SDLC is to:",
+                    "options": {
+                      "A": "Write code from scratch",
+                      "B": "Provide a structured foundation with predefined components and architectures",
+                      "C": "Manage hardware",
+                      "D": "Perform manual testing"
+                    }
+                  },
+                  {
+                    "q_no": 4,
+                    "question": "Software development model involving short cycles or sprints:",
+                    "options": {
+                      "A": "Waterfall Model",
+                      "B": "Agile Methodology",
+                      "C": "Lean Software Development",
+                      "D": "Scrum"
+                    }
+                  },
+                  {
+                    "q_no": 5,
+                    "question": "Crucial aspect of comprehensive project planning:",
+                    "options": {
+                      "A": "Understanding the project scope and tasks",
+                      "B": "Deciding the project’s colour scheme",
+                      "C": "Hiring a large development team",
+                      "D": "Ignoring potential risks"
+                    }
+                  },
+                  {
+                    "q_no": 6,
+                    "question": "Factor does not influence the cost estimation of a software project:",
+                    "options": {
+                      "A": "Scope of the project",
+                      "B": "Technology stack",
+                      "C": "Number of meetings held",
+                      "D": "Operational costs"
+                    }
+                  },
+                  {
+                    "q_no": 7,
+                    "question": "An action needed during Python installation to run from the command line more easily:",
+                    "options": {
+                      "A": "Uncheck \"Add Python to PATH\"",
+                      "B": "Choose a different IDE",
+                      "C": "Check \"Add Python to PATH\"",
+                      "D": "Install only the IDE"
+                    }
+                  },
+                  {
+                    "q_no": 8,
+                    "question": "A valid variable name in Python is",
+                    "options": {
+                      "A": "variable 1",
+                      "B": "1variable",
+                      "C": "variable-name",
+                      "D": "variable name"
+                    }
+                  },
+                  {
+                    "q_no": 9,
+                    "question": "Output of the below code is: age = 25; print(\"Age:\", age)",
+                    "options": {
+                      "A": "Age: 25",
+                      "B": "25",
+                      "C": "Age",
+                      "D": "age"
+                    }
+                  },
+                  {
+                    "q_no": 10,
+                    "question": "The operator is used for exponentiation in Python is:",
+                    "options": { "A": "*", "B": "**", "C": "//", "D": "/" }
+                  },
+                  {
+                    "q_no": 11,
+                    "question": "A loop used to iterate over a collection such as lists is:",
+                    "options": {
+                      "A": "while",
+                      "B": "for",
+                      "C": "do-while",
+                      "D": "repeat"
+                    }
+                  },
+                  {
+                    "q_no": 12,
+                    "question": "A keyword is used to define a function in Python:",
+                    "options": {
+                      "A": "define",
+                      "B": "function",
+                      "C": "def",
+                      "D": "func"
+                    }
+                  },
+                  {
+                    "q_no": 13,
+                    "question": "The output of the following code is: temperature, humidity, wind_speed = 25, 60, 15 print(\"Hot and humid\" if temperature > 30 and humidity > 50 else \"Warm and breezy\" if temperature == 25 and wind_speed > 10 else \"Cool and dry\" if temperature < 20 and humidity < 30 else \"Moderate\")",
+                    "options": {
+                      "A": "Hot",
+                      "B": "Warm and breezy",
+                      "C": "Cool",
+                      "D": "Nothing"
+                    }
+                  },
+                  {
+                    "q_no": 14,
+                    "question": "The operation used to combine two lists in Python:",
+                    "options": {
+                      "A": "combine()",
+                      "B": "concat()",
+                      "C": "+",
+                      "D": "merge()"
+                    }
+                  },
+                  {
+                    "q_no": 15,
+                    "question": "Which of the following is a key advantage of using a framework in software development?",
+                    "options": {
+                      "A": "Speed",
+                      "B": "Flexibility",
+                      "C": "Scalability",
+                      "D": "Testing"
+                    }
+                  },
+                  {
+                    "q_no": 16,
+                    "question": "Which of these best describes a software framework?",
+                    "options": {
+                      "A": "Set of instructions",
+                      "B": "Set of languages",
+                      "C": "Set of tools",
+                      "D": "Translator"
+                    }
+                  },
+                  {
+                    "q_no": 17,
+                    "question": "Which SDLC phase aims to collect information about user needs?",
+                    "options": {
+                      "A": "Testing",
+                      "B": "Requirement Gathering",
+                      "C": "Implementation",
+                      "D": "Design"
+                    }
+                  },
+                  {
+                    "q_no": 18,
+                    "question": "The outcome of the requirement phase is:",
+                    "options": {
+                      "A": "Test plan",
+                      "B": "Design diagrams",
+                      "C": "Requirement Specification Document",
+                      "D": "Source code"
+                    }
+                  },
+                  {
+                    "q_no": 19,
+                    "question": "Who is mainly responsible for collecting requirement?",
+                    "options": {
+                      "A": "Developer",
+                      "B": "Tester",
+                      "C": "Analyst",
+                      "D": "Network Engineer"
+                    }
+                  },
+                  {
+                    "q_no": 20,
+                    "question": "Requirement Gathering is also known as:",
+                    "options": {
+                      "A": "Deployment",
+                      "B": "Planning",
+                      "C": "Analysis",
+                      "D": "Debugging"
+                    }
+                  },
+                  {
+                    "q_no": 21,
+                    "question": "Which of the following best describes a functional requirement?",
+                    "options": {
+                      "A": "The system must be maintainable",
+                      "B": "The system must allow users to log in using credentials",
+                      "C": "The system should load in 3 seconds",
+                      "D": "The interface should be modern and stylish"
+                    }
+                  },
+                  {
+                    "q_no": 22,
+                    "question": "Which tool is most commonly used to model and analyze functional requirements?",
+                    "options": {
+                      "A": "ER Diagrams",
+                      "B": "Gantt Charts",
+                      "C": "Use Case Diagrams",
+                      "D": "Flowcharts"
+                    }
+                  },
+                  {
+                    "q_no": 23,
+                    "question": "Which of these is not a functional requirement for an ATM system?",
+                    "options": {
+                      "A": "Print transaction receipts",
+                      "B": "Authenticate PIN",
+                      "C": "Maintain 99.9% uptime",
+                      "D": "Withdraw cash"
+                    }
+                  },
+                  {
+                    "q_no": 24,
+                    "question": "Which of the following is a non-functional requirement?",
+                    "options": {
+                      "A": "System must allow fund transfer",
+                      "B": "System should encrypt sensitive data",
+                      "C": "User can change password",
+                      "D": "Admin can add a user"
+                    }
+                  },
+                  {
+                    "q_no": 25,
+                    "question": "Scalability, performance, and reliability are types of:",
+                    "options": {
+                      "A": "Functional requirements",
+                      "B": "Business constraints",
+                      "C": "User cases",
+                      "D": "Non-functional requirements"
+                    }
+                  },
+                  {
+                    "q_no": 26,
+                    "question": "Which non-functional requirement ensures the system can handle increasing loads without performance drop?",
+                    "options": {
+                      "A": "Usability",
+                      "B": "Scalability",
+                      "C": "Maintainability",
+                      "D": "Availability"
+                    }
+                  },
+                  {
+                    "q_no": 27,
+                    "question": "What is the main output of the design phase?",
+                    "options": {
+                      "A": "Test Plan",
+                      "B": "Design Documents",
+                      "C": "Code Files",
+                      "D": "Deployment Report"
+                    }
+                  },
+                  {
+                    "q_no": 28,
+                    "question": "Which of these is part of design phase activities?",
+                    "options": {
+                      "A": "Writing code",
+                      "B": "Creating UML diagrams",
+                      "C": "Collecting requirements",
+                      "D": "Installing the software"
+                    }
+                  },
+                  {
+                    "q_no": 29,
+                    "question": "In which SDLC phase is actual coding done?",
+                    "options": {
+                      "A": "Testing",
+                      "B": "Design",
+                      "C": "Development",
+                      "D": "Implementation"
+                    }
+                  },
+                  {
+                    "q_no": 30,
+                    "question": "Which team is most involved in development?",
+                    "options": {
+                      "A": "Developers",
+                      "B": "Testers",
+                      "C": "Business Analysts",
+                      "D": "Users"
+                    }
+                  },
+                  {
+                    "q_no": 31,
+                    "question": "Bug fixing is part of which SDLC phase?",
+                    "options": {
+                      "A": "Design",
+                      "B": "Testing",
+                      "C": "Requirement",
+                      "D": "Planning"
+                    }
+                  },
+                  {
+                    "q_no": 32,
+                    "question": "The phase where the software is installed in the real environment is called:",
+                    "options": {
+                      "A": "Coding",
+                      "B": "Implementation",
+                      "C": "Testing",
+                      "D": "Analysis"
+                    }
+                  },
+                  {
+                    "q_no": 33,
+                    "question": "Who mostly uses the system after implementation?",
+                    "options": {
+                      "A": "Developers",
+                      "B": "Testers",
+                      "C": "End Users",
+                      "D": "Designers"
+                    }
+                  },
+                  {
+                    "q_no": 34,
+                    "question": "What is the primary risk of skipping the design phase in the SDLC?",
+                    "options": {
+                      "A": "Poor hardware support",
+                      "B": "Unnecessary testing",
+                      "C": "Lack of documentation",
+                      "D": "Poor system structure and scalability"
+                    }
+                  },
+                  {
+                    "q_no": 35,
+                    "question": "Performance testing checks:",
+                    "options": {
+                      "A": "Good color",
+                      "B": "Works with other software",
+                      "C": "Fast with many users",
+                      "D": "User-friendly design"
+                    }
+                  },
+                  {
+                    "q_no": 36,
+                    "question": "Why do we do compatibility testing?",
+                    "options": {
+                      "A": "Make software beautiful",
+                      "B": "Works on all devices",
+                      "C": "Learn new languages",
+                      "D": "Add storage"
+                    }
+                  },
+                  {
+                    "q_no": 37,
+                    "question": "Why is maintenance phase needed after deployment?",
+                    "options": {
+                      "A": "To delete old files",
+                      "B": "To play music",
+                      "C": "To update and fix software",
+                      "D": "To write user manuals"
+                    }
+                  },
+                  {
+                    "q_no": 38,
+                    "question": "Which of the following is NOT a main activity in the design phase?",
+                    "options": {
+                      "A": "Create diagrams",
+                      "B": "Plan architecture",
+                      "C": "Write source code",
+                      "D": "Develop models"
+                    }
+                  },
+                  {
+                    "q_no": 39,
+                    "question": "What is the purpose of creating mockups during the design phase?",
+                    "options": {
+                      "A": "For testing performance",
+                      "B": "To visualize software structure",
+                      "C": "For writing final code",
+                      "D": "To secure software"
+                    }
+                  },
+                  {
+                    "q_no": 40,
+                    "question": "What does the design phase focus on most?",
+                    "options": {
+                      "A": "Final testing",
+                      "B": "User interface planning",
+                      "C": "Database maintenance",
+                      "D": "Hardware installation"
+                    }
+                  },
+                  {
+                    "q_no": 41,
+                    "question": "Which phase includes functionality, performance, and compatibility testing?",
+                    "options": {
+                      "A": "Deployment",
+                      "B": "Testing",
+                      "C": "Design",
+                      "D": "Development"
+                    }
+                  },
+                  {
+                    "q_no": 42,
+                    "question": "What is functionality testing mainly used for?",
+                    "options": {
+                      "A": "Checking user behavior",
+                      "B": "Making software faster",
+                      "C": "Making sure features work properly",
+                      "D": "Installing the software"
+                    }
+                  },
+                  {
+                    "q_no": 43,
+                    "question": "Compatibility testing is done to:",
+                    "options": {
+                      "A": "Find bugs in code",
+                      "B": "Check use on various devices",
+                      "C": "Improve loading speed",
+                      "D": "Add new features"
+                    }
+                  },
+                  {
+                    "q_no": 44,
+                    "question": "Which one is NOT part of the deployment phase?",
+                    "options": {
+                      "A": "Installation",
+                      "B": "Configuration",
+                      "C": "Code writing",
+                      "D": "Real-world testing"
+                    }
+                  },
+                  {
+                    "q_no": 45,
+                    "question": "What happens during the configuration step of deployment?",
+                    "options": {
+                      "A": "Code compiled",
+                      "B": "Software updated",
+                      "C": "Setting adjusted",
+                      "D": "Testing on devs’ PCs"
+                    }
+                  },
+                  {
+                    "q_no": 46,
+                    "question": "In which phase is the software monitored and updated over time?",
+                    "options": {
+                      "A": "Testing",
+                      "B": "Development",
+                      "C": "Maintenance",
+                      "D": "Design"
+                    }
+                  },
+                  {
+                    "q_no": 47,
+                    "question": "Which software model is best for projects with fixed and clear requirements?",
+                    "options": {
+                      "A": "Waterfall",
+                      "B": "Scrum",
+                      "C": "Agile",
+                      "D": "DevOps"
+                    }
+                  },
+                  {
+                    "q_no": 48,
+                    "question": "Why is Agile better for fast-changing environment?",
+                    "options": {
+                      "A": "No testing",
+                      "B": "Deliver all at once",
+                      "C": "Short cycles, adapt",
+                      "D": "No planning"
+                    }
+                  },
+                  {
+                    "q_no": 49,
+                    "question": "Which practice in Agile focuses on writing tests before coding?",
+                    "options": {
+                      "A": "Pair Programming",
+                      "B": "Sprint Review",
+                      "C": "Test-Driven Development",
+                      "D": "Increment Planning"
+                    }
+                  },
+                  {
+                    "q_no": 50,
+                    "question": "Which SDLC model is best suited when requirements are unclear and expected to change frequently?",
+                    "options": {
+                      "A": "Waterfall",
+                      "B": "V-Model",
+                      "C": "Agile",
+                      "D": "RAD"
+                    }
+                  }
+                ],
+                "Additional Questions": [
+                  {
+                    "q_no": 51,
+                    "question": "In Agile methodology, which document is closest to a traditional SRS?",
+                    "options": {
+                      "A": "Sprint Backlog",
+                      "B": "Product Backlog",
+                      "C": "Design Document",
+                      "D": "Test Plan"
+                    }
+                  },
+                  {
+                    "q_no": 52,
+                    "question": "Which phase helps define the goal and purpose of a software project?",
+                    "options": {
+                      "A": "Planning",
+                      "B": "Execution",
+                      "C": "Initiation",
+                      "D": "Monitoring"
+                    }
+                  },
+                  {
+                    "q_no": 53,
+                    "question": "Who mainly controls the planning and budgeting of a project?",
+                    "options": {
+                      "A": "Project Manager",
+                      "B": "QA Tester",
+                      "C": "Frontend Developer",
+                      "D": "UI Designer"
+                    }
+                  },
+                  {
+                    "q_no": 54,
+                    "question": "Why is performance monitoring important in software projects?",
+                    "options": {
+                      "A": "Developers relax",
+                      "B": "Track & solve early",
+                      "C": "End project fast",
+                      "D": "No teamwork"
+                    }
+                  },
+                  {
+                    "q_no": 55,
+                    "question": "Which factor does not directly affect cost estimation?",
+                    "options": {
+                      "A": "Developer’s hourly rate",
+                      "B": "Technology used",
+                      "C": "Final product design",
+                      "D": "Project duration"
+                    }
+                  },
+                  {
+                    "q_no": 56,
+                    "question": "How does risk management improve project success?",
+                    "options": {
+                      "A": "Add delays",
+                      "B": "Confuse team",
+                      "C": "Waste money",
+                      "D": "Avoid surprises"
+                    }
+                  },
+                  {
+                    "q_no": 57,
+                    "question": "Which one is a technical risk in a project?",
+                    "options": {
+                      "A": "Team member is sick",
+                      "B": "New technology may fail",
+                      "C": "Budget is increased",
+                      "D": "Customer feedback is positive"
+                    }
+                  },
+                  {
+                    "q_no": 58,
+                    "question": "Why is quality assurance (QA) done before delivering the project?",
+                    "options": {
+                      "A": "To delete some features",
+                      "B": "To reduce product quality",
+                      "C": "To prevent bugs and check quality",
+                      "D": "To avoid user input"
+                    }
+                  },
+                  {
+                    "q_no": 59,
+                    "question": "Which quality assurance activity helps is early detection of code errors?",
+                    "options": {
+                      "A": "Progress monitoring",
+                      "B": "Stakeholder feedback",
+                      "C": "Code review",
+                      "D": "Risk planning"
+                    }
+                  },
+                  {
+                    "q_no": 60,
+                    "question": "Which sentence explains cost estimation well?",
+                    "options": {
+                      "A": "Make tea",
+                      "B": "Plan cost & budget",
+                      "C": "Delay work",
+                      "D": "Remove team"
+                    }
+                  },
+                  {
+                    "q_no": 61,
+                    "question": "Which sentence explains risk mitigation strategy?",
+                    "options": {
+                      "A": "More developers = more problems",
+                      "B": "Ignore issues",
+                      "C": "Add buffer time",
+                      "D": "No testing"
+                    }
+                  },
+                  {
+                    "q_no": 62,
+                    "question": "Which pattern ensures only one instance of a class is created in a system?",
+                    "options": {
+                      "A": "Factory Pattern",
+                      "B": "Strategy Pattern",
+                      "C": "Singleton Pattern",
+                      "D": "Observer Pattern"
+                    }
+                  },
+                  {
+                    "q_no": 63,
+                    "question": "Which design pattern is best for sending updates to multiple users at the same time?",
+                    "options": {
+                      "A": "Observer",
+                      "B": "Factory",
+                      "C": "Singleton",
+                      "D": "Strategy"
+                    }
+                  },
+                  {
+                    "q_no": 64,
+                    "question": "Which design pattern acts like a toolbox allowing selection of different tools (algorithms)?",
+                    "options": {
+                      "A": "Observer Pattern",
+                      "B": "Strategy Pattern",
+                      "C": "Factory Pattern",
+                      "D": "Singleton Pattern"
+                    }
+                  },
+                  {
+                    "q_no": 65,
+                    "question": "Which design pattern hides the creation of objects and gives ready-made results?",
+                    "options": {
+                      "A": "Strategy Pattern",
+                      "B": "Observer Pattern",
+                      "C": "Factory Pattern",
+                      "D": "Singleton Pattern"
+                    }
+                  },
+                  {
+                    "q_no": 66,
+                    "question": "Why is the Singleton Pattern useful in software systems?",
+                    "options": {
+                      "A": "Create many objects",
+                      "B": "Flexible structure",
+                      "C": "Auto user connection",
+                      "D": "Single shared object"
+                    }
+                  },
+                  {
+                    "q_no": 67,
+                    "question": "Which of the following is a benefit of using design patterns in software?",
+                    "options": {
+                      "A": "Longer but better code",
+                      "B": "Reduce complexity & reuse",
+                      "C": "No need for teamwork",
+                      "D": "Skip all testing"
+                    }
+                  },
+                  {
+                    "q_no": 68,
+                    "question": "Which design pattern is ideal for changing the way a system behaves without changing its entire code?",
+                    "options": {
+                      "A": "Factory Pattern",
+                      "B": "Observer Pattern",
+                      "C": "Strategy Pattern",
+                      "D": "Singleton Pattern"
+                    }
+                  },
+                  {
+                    "q_no": 69,
+                    "question": "How does the Factory Pattern help in software development?",
+                    "options": {
+                      "A": "Copy same object",
+                      "B": "Hide creation steps",
+                      "C": "Message all objects",
+                      "D": "Auto delete objects"
+                    }
+                  },
+                  {
+                    "q_no": 70,
+                    "question": "Which type of testing is done by users to check if software meets their needs?",
+                    "options": {
+                      "A": "Unit Testing",
+                      "B": "Integration Testing",
+                      "C": "System Testing",
+                      "D": "Acceptance Testing"
+                    }
+                  },
+                  {
+                    "q_no": 71,
+                    "question": "Which tool allows developers to check code step by step to find bugs?",
+                    "options": {
+                      "A": "Translator",
+                      "B": "Debugger",
+                      "C": "Repository",
+                      "D": "IDE"
+                    }
+                  },
+                  {
+                    "q_no": 72,
+                    "question": "Which process helps developers check if small parts of code work correctly?",
+                    "options": {
+                      "A": "System Testing",
+                      "B": "Acceptance Testing",
+                      "C": "Unit Testing",
+                      "D": "Integration Testing"
+                    }
+                  },
+                  {
+                    "q_no": 73,
+                    "question": "Why is code review useful in software development?",
+                    "options": {
+                      "A": "Saves memory",
+                      "B": "Tests with users",
+                      "C": "Translates to machine language",
+                      "D": "Finds mistakes before testing"
+                    }
+                  },
+                  {
+                    "q_no": 74,
+                    "question": "Which tool stores and manages project code in one place for many people?",
+                    "options": {
+                      "A": "Compiler",
+                      "B": "Source Code Repository",
+                      "C": "Debugger",
+                      "D": "Interpreter"
+                    }
+                  },
+                  {
+                    "q_no": 75,
+                    "question": "Which software tool combines writing, testing, and debugging in one place?",
+                    "options": {
+                      "A": "Online Editor",
+                      "B": "Translator",
+                      "C": "IDE",
+                      "D": "Debugger"
+                    }
+                  },
+                  {
+                    "q_no": 76,
+                    "question": "How to translators help in software development?",
+                    "options": {
+                      "A": "Fix logic errors",
+                      "B": "Store code securely",
+                      "C": "Convert to machine code",
+                      "D": "Check speed"
+                    }
+                  },
+                  {
+                    "q_no": 77,
+                    "question": "Which testing step checks if connected parts of software work together?",
+                    "options": {
+                      "A": "Unit Testing",
+                      "B": "Integration Testing",
+                      "C": "Code Review",
+                      "D": "Debugging"
+                    }
+                  },
+                  {
+                    "q_no": 78,
+                    "question": "Why do developers use print statements during debugging?",
+                    "options": {
+                      "A": "To speed up the whole program",
+                      "B": "To reduce testing time",
+                      "C": "To see the values of variables during execution",
+                      "D": "To create graphical reports"
+                    }
+                  },
+                  {
+                    "q_no": 79,
+                    "question": "Which platform is used for running and testing code without installation?",
+                    "options": {
+                      "A": "Offline Editor",
+                      "B": "Debugger",
+                      "C": "Online Computing Platform",
+                      "D": "Compiler"
+                    }
+                  },
+                  {
+                    "q_no": 80,
+                    "question": "Who is the creator of the Python programming language?",
+                    "options": {
+                      "A": "Brendan Eich",
+                      "B": "James Gosling",
+                      "C": "Guido van Rossum",
+                      "D": "Bjarne Stroustrup"
+                    }
+                  },
+                  {
+                    "q_no": 81,
+                    "question": "Why is the file extension for Python files?",
+                    "options": {
+                      "A": ".py",
+                      "B": ".pyt",
+                      "C": ".python",
+                      "D": ".ptn"
+                    }
+                  },
+                  {
+                    "q_no": 82,
+                    "question": "Which of the following is a major benefit of Python’s syntax?",
+                    "options": {
+                      "A": "Complexity",
+                      "B": "Readability",
+                      "C": "Verbosity",
+                      "D": "Ambiguity"
+                    }
+                  },
+                  {
+                    "q_no": 83,
+                    "question": "Python is widely used in web development. Which of the following is a popular web framework for Python?",
+                    "options": {
+                      "A": "React",
+                      "B": "Django",
+                      "C": "Angular",
+                      "D": "Laravel"
+                    }
+                  },
+                  {
+                    "q_no": 84,
+                    "question": "Which of the following areas is Python extensively used for automation and scripting?",
+                    "options": {
+                      "A": "Operating systems",
+                      "B": "Artificial intelligence",
+                      "C": "Scripting repetitive tasks",
+                      "D": "Mobile app development"
+                    }
+                  },
+                  {
+                    "q_no": 85,
+                    "question": "What does the acronym IDLE stand for in the context of Python?",
+                    "options": {
+                      "A": "Integrated Development and learning Environment",
+                      "B": "Interactive Development Learning Environment",
+                      "C": "Integrated Data Language Environment",
+                      "D": "Interactive Debugging Learning Environment"
+                    }
+                  },
+                  {
+                    "q_no": 86,
+                    "question": "How can you access the Python shell in IDLE?",
+                    "options": {
+                      "A": "By selecting \"File > New File\"",
+                      "B": "By pressing F1",
+                      "C": "By selecting \"Run > Python Shell\"",
+                      "D": "By opening the command prompt"
+                    }
+                  },
+                  {
+                    "q_no": 87,
+                    "question": "Which of the following is a benefit of using IDLE for beginners?",
+                    "options": {
+                      "A": "Complex interface",
+                      "B": "High memory usage",
+                      "C": "Integrated debugger",
+                      "D": "Extensive plugin support"
+                    }
+                  },
+                  {
+                    "q_no": 88,
+                    "question": "Which quality of Python helps beginners focus more no logic than on syntax?",
+                    "options": {
+                      "A": "Special symbols",
+                      "B": "English-like syntax",
+                      "C": "Complex grammar",
+                      "D": "Compiler speed"
+                    }
+                  },
+                  {
+                    "q_no": 89,
+                    "question": "Which symbol is used for writing a single-line comment in Python?",
+                    "options": { "A": "//", "B": "#", "C": "}}", "D": "/*" }
+                  },
+                  {
+                    "q_no": 90,
+                    "question": "What is the correct way to print \"Hello, World!\" in Python?",
+                    "options": {
+                      "A": "echo(\"Hello, World!\")",
+                      "B": "print(\"Hello, World!\")",
+                      "C": "printf(\"Hello, World!\")",
+                      "D": "cout << \"Hello, World!\";"
+                    }
+                  }
+                ],
+                "Pastpapers Questions": [
+                  {
+                    "q_no": 101,
+                    "question": "What is the correct way to declare a variable in Python?",
+                    "options": {
+                      "A": "var myVar = 10",
+                      "B": "myVar : int = 10",
+                      "C": "myVar = 10",
+                      "D": "int myVar = 10"
+                    }
+                  },
+                  {
+                    "q_no": 102,
+                    "question": "What will be the output of the following code? x = 5 y = x y += 2 print(x, y)",
+                    "options": {
+                      "A": "5 7",
+                      "B": "7 7",
+                      "C": "5 5",
+                      "D": "7 5"
+                    }
+                  },
+                  {
+                    "q_no": 103,
+                    "question": "Which operator is used for floor division in Python?",
+                    "options": { "A": "/", "B": "//", "C": "%", "D": "**" }
+                  },
+                  {
+                    "q_no": 104,
+                    "question": "Which of these gives True only when both conditions are True?",
+                    "options": { "A": "or", "B": "not", "C": "and", "D": "==" }
+                  },
+                  {
+                    "q_no": 105,
+                    "question": "Which logical operator is used to reverse a condition?",
+                    "options": { "A": "and", "B": "or", "C": "not", "D": "!=" }
+                  },
+                  {
+                    "q_no": 106,
+                    "question": "Which statement is used to combine conditions in decision making?",
+                    "options": {
+                      "A": "Logical operators",
+                      "B": "Arithmetic operators",
+                      "C": "Input/output functions",
+                      "D": "Assignment operators"
+                    }
+                  },
+                  {
+                    "q_no": 107,
+                    "question": "Which line of code correctly takes float input from the user?",
+                    "options": {
+                      "A": "height = float(input(\"Enter height: \"))",
+                      "B": "float = input(height)",
+                      "C": "height := input(float)",
+                      "D": "input(float(height))"
+                    }
+                  },
+                  {
+                    "q_no": 108,
+                    "question": "What is the result of the following code? x = 10 y = 3 result = x % y print(result)",
+                    "options": { "A": "1", "B": "3", "C": "0", "D": "10" }
+                  },
+                  {
+                    "q_no": 109,
+                    "question": "Which operator is used to check if two values are equal in Python?",
+                    "options": { "A": "=", "B": "==", "C": "!=", "D": "===" }
+                  },
+                  {
+                    "q_no": 110,
+                    "question": "Which operator is used to check if a value is not equal to another value?",
+                    "options": { "A": "=", "B": "==", "C": "!=", "D": "<>" }
+                  },
+                  {
+                    "q_no": 111,
+                    "question": "What will be the output of the following code? a = 7 b = 7 c = 8 result = a < b < c print(result)",
+                    "options": {
+                      "A": "True",
+                      "B": "False",
+                      "C": "Error",
+                      "D": "None"
+                    }
+                  },
+                  {
+                    "q_no": 112,
+                    "question": "Which logical operator is used to perform a logical AND operation in Python?",
+                    "options": { "A": "&&", "B": "and", "C": "&", "D": "Or" }
+                  },
+                  {
+                    "q_no": 113,
+                    "question": "What is the output of this code: print(\"Even\" if 10 % 2 == 0 else \"Odd\")?",
+                    "options": {
+                      "A": "True",
+                      "B": "False",
+                      "C": "Even",
+                      "D": "Odd"
+                    }
+                  },
+                  {
+                    "q_no": 114,
+                    "question": "In which statement does the condition check happen before each iteration?",
+                    "options": {
+                      "A": "for",
+                      "B": "while",
+                      "C": "if",
+                      "D": "else"
+                    }
+                  },
+                  {
+                    "q_no": 115,
+                    "question": "Which is the correct short-hand form to check if a number is odd?",
+                    "options": {
+                      "A": "print(\"Odd\" if num % 2 != 0 else \"Even\")",
+                      "B": "if num % 2 != 0 print(\"Odd\")",
+                      "C": "num % 2 == 1 then print(\"Odd\")",
+                      "D": "print(\"Even\" if num % 2 == 0 or \"Odd\")"
+                    }
+                  },
+                  {
+                    "q_no": 116,
+                    "question": "How does Python decide which elif block to run?",
+                    "options": {
+                      "A": "It checks all and runs all true ones",
+                      "B": "Only the last one is checked",
+                      "C": "The first true condition runs",
+                      "D": "None are checked if is false"
+                    }
+                  },
+                  {
+                    "q_no": 117,
+                    "question": "Which one helps handle opposite actions based on a condition?",
+                    "options": {
+                      "A": "elif",
+                      "B": "else only",
+                      "C": "if-else",
+                      "D": "while loop"
+                    }
+                  },
+                  {
+                    "q_no": 118,
+                    "question": "Which part of the code runs if no if or elif condition is true?",
+                    "options": {
+                      "A": "loop block",
+                      "B": "return block",
+                      "C": "else block",
+                      "D": "print block"
+                    }
+                  },
+                  {
+                    "q_no": 119,
+                    "question": "What does this Python code print? age = 20 print(\"Teen\" if age < 18 else \"Adult\")",
+                    "options": {
+                      "A": "Teen",
+                      "B": "Adult",
+                      "C": "Error",
+                      "D": "20"
+                    }
+                  },
+                  {
+                    "q_no": 120,
+                    "question": "Which of the following statements about if-else is FALSE?",
+                    "options": {
+                      "A": "It runs both blocks always",
+                      "B": "Only one block runs",
+                      "C": "It helps in decision-making",
+                      "D": "It runs else if the condition is false"
+                    }
+                  },
+                  {
+                    "q_no": 121,
+                    "question": "Which of the following best defines a Control Structure in programming?",
+                    "options": {
+                      "A": "Flow rule",
+                      "B": "Repeat code",
+                      "C": "Code flow control",
+                      "D": "It controls the flow of instructions in a program."
+                    }
+                  },
+                  {
+                    "q_no": 122,
+                    "question": "What will be the output of this code? x = 10 if x < 5: print(\"Smart\") print(\"Done\")",
+                    "options": {
+                      "A": "Small",
+                      "B": "Done",
+                      "C": "Small Done",
+                      "D": "Error"
+                    }
+                  },
+                  {
+                    "q_no": 123,
+                    "question": "The keyword elif in Python is used for:",
+                    "options": {
+                      "A": "Ending loop",
+                      "B": "Multiple conditions",
+                      "C": "Infinite loop",
+                      "D": "Loop termination"
+                    }
+                  },
+                  {
+                    "q_no": 124,
+                    "question": "Which structure lets Python repeat a block of code?",
+                    "options": {
+                      "A": "Looping",
+                      "B": "Jumping",
+                      "C": "Conditional",
+                      "D": "Returning repeatedly"
+                    }
+                  },
+                  {
+                    "q_no": 125,
+                    "question": "What type of loop runs based on a condition?",
+                    "options": {
+                      "A": "for",
+                      "B": "while",
+                      "C": "both",
+                      "D": "None"
+                    }
+                  },
+                  {
+                    "q_no": 126,
+                    "question": "What will this print: n = 1 while n < 4: print(n) n += 1",
+                    "options": {
+                      "A": "0 1 2",
+                      "B": "1 2 3",
+                      "C": "1 2 3 4",
+                      "D": "Infinite loop"
+                    }
+                  },
+                  {
+                    "q_no": 127,
+                    "question": "What will be the output of the following code? count = 0 while count < 5: print(count, end=' ') count +=2 else: print(\"Done\")",
+                    "options": {
+                      "A": "0 1 2 3 4 Done",
+                      "B": "0 2 4 Done",
+                      "C": "0 2 4",
+                      "D": "0 1 2 3 4"
+                    }
+                  },
+                  {
+                    "q_no": 128,
+                    "question": "Why are default parameters useful in Python functions?",
+                    "options": {
+                      "A": "To avoid runtime errors",
+                      "B": "To reuse variables",
+                      "C": "To handle missing arguments",
+                      "D": "To define global variables"
+                    }
+                  },
+                  {
+                    "q_no": 129,
+                    "question": "How many arguments will be used in this function call: greet() if the function is def greet(name = \"Guest\")?",
+                    "options": {
+                      "A": "Two",
+                      "B": "One",
+                      "C": "Zero",
+                      "D": "Infinite"
+                    }
+                  },
+                  {
+                    "q_no": 130,
+                    "question": "Why are modules used in large Python programs?",
+                    "options": {
+                      "A": "To reduce memory",
+                      "B": "To avoid syntax errors",
+                      "C": "To organize code into parts",
+                      "D": "To increase complexity"
+                    }
+                  },
+                  {
+                    "q_no": 131,
+                    "question": "Which function will return the largest number from a list?",
+                    "options": {
+                      "A": "max()",
+                      "B": "sum()",
+                      "C": "large()",
+                      "D": "sort()"
+                    }
+                  },
+                  {
+                    "q_no": 132,
+                    "question": "How does Python know which module belongs to which package?",
+                    "options": {
+                      "A": "By naming it",
+                      "B": "By folder structure",
+                      "C": "Using comments",
+                      "D": "Manually assigning"
+                    }
+                  },
+                  {
+                    "q_no": 133,
+                    "question": "What will be the output of this code? import random print(random.randint(1, 1))",
+                    "options": {
+                      "A": "Error",
+                      "B": "Random number",
+                      "C": "1",
+                      "D": "None"
+                    }
+                  },
+                  {
+                    "q_no": 134,
+                    "question": "Which function is being called in this line? print(greet(\"Ali\"))",
+                    "options": {
+                      "A": "print",
+                      "B": "input",
+                      "C": "Ali",
+                      "D": "greet"
+                    }
+                  },
+                  {
+                    "q_no": 135,
+                    "question": "Who decides the number of parameters in a function?",
+                    "options": {
+                      "A": "Python interpreter",
+                      "B": "Built-in module",
+                      "C": "Function designer",
+                      "D": "The user"
+                    }
+                  },
+                  {
+                    "q_no": 136,
+                    "question": "Which output is correct for this code? def hello(name = \"Friend\"): return \"Hi \" + name print(hello())",
+                    "options": {
+                      "A": "Hi",
+                      "B": "Error",
+                      "C": "Hello Friend",
+                      "D": "Hi Friend"
+                    }
+                  },
+                  {
+                    "q_no": 137,
+                    "question": "Which of these is an example of a package?",
+                    "options": {
+                      "A": ".py file",
+                      "B": "def function",
+                      "C": "import math",
+                      "D": "ecommerce"
+                    }
+                  },
+                  {
+                    "q_no": 138,
+                    "question": "Which slicing expression gives ['Blue', 'Yellow'] from this list? color = [\"Red\", \"Green\", \"Blue\", \"Yellow\", \"Purple\"]",
+                    "options": {
+                      "A": "colors[2:4]",
+                      "B": "colors[1:3]",
+                      "C": "colors[0:2]",
+                      "D": "colors[3:5]"
+                    }
+                  },
+                  {
+                    "q_no": 139,
+                    "question": "How many items will this tuple contain? t = (\"Hi\", 2, 3.5, True, [1, 2])",
+                    "options": { "A": "4", "B": "5", "C": "6", "D": "Error" }
+                  },
+                  {
+                    "q_no": 140,
+                    "question": "Which one is an immutable data structure?",
+                    "options": {
+                      "A": "List",
+                      "B": "Tuple",
+                      "C": "Dictionary",
+                      "D": "Set"
+                    }
+                  },
+                  {
+                    "q_no": 141,
+                    "question": "What will be printed by this code? my_list = [\"a\", \"b\", \"c\"] my_list.append([\"d\", \"e\"]) print(len(my_list))",
+                    "options": { "A": "3", "B": "4", "C": "5", "D": "Error" }
+                  },
+                  {
+                    "q_no": 142,
+                    "question": "Which method will sort a list in alphabetical order permanently?",
+                    "options": {
+                      "A": "reverse()",
+                      "B": "sorted()",
+                      "C": "sort()",
+                      "D": "swap()"
+                    }
+                  },
+                  {
+                    "q_no": 143,
+                    "question": "Which of these allows duplicate elements?",
+                    "options": {
+                      "A": "List",
+                      "B": "Tuple",
+                      "C": "Both",
+                      "D": "None"
+                    }
+                  },
+                  {
+                    "q_no": 144,
+                    "question": "How many elements are returned by colors[::2] if colors = [\"Red\", \"Green\", \"Blue\", \"Yellow\", \"Purple\", \"Black\"]",
+                    "options": { "A": "3", "B": "4", "C": "2", "D": "6" }
+                  },
+                  {
+                    "q_no": 145,
+                    "question": "Which function will raise an error if the value does not exist in the list?",
+                    "options": {
+                      "A": "remove()",
+                      "B": "pop()",
+                      "C": "append()",
+                      "D": "insert()"
+                    }
+                  },
+                  {
+                    "q_no": 146,
+                    "question": "What happens if we try to change a tuple element?",
+                    "options": {
+                      "A": "Change it",
+                      "B": "Ignores it",
+                      "C": "Throws Error",
+                      "D": "Adds it"
+                    }
+                  },
+                  {
+                    "q_no": 147,
+                    "question": "Which code will print ['Green', 'Blue', 'Yellow']?",
+                    "options": {
+                      "A": "colors[1:4]",
+                      "B": "colors[0:3]",
+                      "C": "colors[2:5]",
+                      "D": "colors[1:3]"
+                    }
+                  },
+                  {
+                    "q_no": 148,
+                    "question": "In which case does slicing not include the last index?",
+                    "options": {
+                      "A": "Always",
+                      "B": "Never",
+                      "C": "Sometimes",
+                      "D": "Only in even indices"
+                    }
+                  },
+                  {
+                    "q_no": 149,
+                    "question": "What will be the output? lst = [1, 2, 3] lst.remove(4) print(lst)",
+                    "options": {
+                      "A": "[1, 2, 3]",
+                      "B": "[1, 2]",
+                      "C": "Error",
+                      "D": "None"
+                    }
+                  },
+                  {
+                    "q_no": 150,
+                    "question": "Which built-in function returns the number of elements in a tuple?",
+                    "options": {
+                      "A": "len()",
+                      "B": "count()",
+                      "C": "index()",
+                      "D": "range()"
+                    }
+                  }
+                ]
+              },
+              "shorts": {
+                "Exercise Questions": [
+                  {
+                    "id": 1,
+                    "question": "Differentiate between direct and indirect input."
+                  },
+                  { "id": 2, "question": "What are pointing devices?" },
+                  { "id": 3, "question": "What is the use of MICR?" },
+                  { "id": 4, "question": "How does pilot conversion work?" },
+                  { "id": 5, "question": "Define groupware." },
+                  { "id": 6, "question": "What is extranet?" },
+                  { "id": 7, "question": "What is boot sector virus?" },
+                  {
+                    "id": 8,
+                    "question": "Define a signal and list down its types."
+                  },
+                  { "id": 9, "question": "What do you know about Unicode?" },
+                  {
+                    "id": 10,
+                    "question": "What are two characteristics of analog signals?"
+                  },
+                  {
+                    "id": 11,
+                    "question": "Define MODEM and list down its types."
+                  },
+                  { "id": 12, "question": "What is E-banking?" },
+                  { "id": 13, "question": "Define an event." },
+                  {
+                    "id": 14,
+                    "question": "Distinguish between Cut and Copy commands."
+                  },
+                  { "id": 15, "question": "What is DMA?" },
+                  { "id": 16, "question": "Define data bus." },
+                  { "id": 17, "question": "What do you know about EPROM?" },
+                  {
+                    "id": 18,
+                    "question": "What is port? Write some commonly used ports."
+                  },
+                  {
+                    "id": 19,
+                    "question": "What is the purpose of control bus?"
+                  },
+                  { "id": 20, "question": "Define IP address." },
+                  {
+                    "id": 21,
+                    "question": "Differentiate between IPv4 and IPv6 addresses."
+                  }
+                ],
+                "Pastpapers Questions": [
+                  {
+                    "id": 1,
+                    "question": "Differentiate between direct and indirect input."
+                  },
+                  { "id": 2, "question": "What are pointing devices?" },
+                  { "id": 3, "question": "What is the use of MICR?" },
+                  { "id": 4, "question": "How does pilot conversion work?" },
+                  { "id": 5, "question": "Define groupware." },
+                  { "id": 6, "question": "What is extranet?" },
+                  { "id": 7, "question": "What is boot sector virus?" },
+                  {
+                    "id": 8,
+                    "question": "Define a signal and list down its types."
+                  },
+                  { "id": 9, "question": "What do you know about Unicode?" },
+                  {
+                    "id": 10,
+                    "question": "What are two characteristics of analog signals?"
+                  },
+                  {
+                    "id": 11,
+                    "question": "Define MODEM and list down its types."
+                  },
+                  { "id": 12, "question": "What is E-banking?" },
+                  { "id": 13, "question": "Define an event." },
+                  {
+                    "id": 14,
+                    "question": "Distinguish between Cut and Copy commands."
+                  },
+                  { "id": 15, "question": "What is DMA?" },
+                  { "id": 16, "question": "Define data bus." },
+                  { "id": 17, "question": "What do you know about EPROM?" },
+                  {
+                    "id": 18,
+                    "question": "What is port? Write some commonly used ports."
+                  },
+                  {
+                    "id": 19,
+                    "question": "What is the purpose of control bus?"
+                  },
+                  { "id": 20, "question": "Define IP address." },
+                  {
+                    "id": 21,
+                    "question": "Differentiate between IPv4 and IPv6 addresses."
+                  }
+                ],
+                "Additional Questions": [
+                  {
+                    "id": 1,
+                    "question": "Differentiate between direct and indirect input."
+                  },
+                  { "id": 2, "question": "What are pointing devices?" },
+                  { "id": 3, "question": "What is the use of MICR?" },
+                  { "id": 4, "question": "How does pilot conversion work?" },
+                  { "id": 5, "question": "Define groupware." },
+                  { "id": 6, "question": "What is extranet?" },
+                  { "id": 7, "question": "What is boot sector virus?" },
+                  {
+                    "id": 8,
+                    "question": "Define a signal and list down its types."
+                  },
+                  { "id": 9, "question": "What do you know about Unicode?" },
+                  {
+                    "id": 10,
+                    "question": "What are two characteristics of analog signals?"
+                  },
+                  {
+                    "id": 11,
+                    "question": "Define MODEM and list down its types."
+                  },
+                  { "id": 12, "question": "What is E-banking?" },
+                  { "id": 13, "question": "Define an event." },
+                  {
+                    "id": 14,
+                    "question": "Distinguish between Cut and Copy commands."
+                  },
+                  { "id": 15, "question": "What is DMA?" },
+                  { "id": 16, "question": "Define data bus." },
+                  { "id": 17, "question": "What do you know about EPROM?" },
+                  {
+                    "id": 18,
+                    "question": "What is port? Write some commonly used ports."
+                  },
+                  {
+                    "id": 19,
+                    "question": "What is the purpose of control bus?"
+                  },
+                  { "id": 20, "question": "Define IP address." },
+                  {
+                    "id": 21,
+                    "question": "Differentiate between IPv4 and IPv6 addresses."
+                  }
+                ]
+              },
+              "longs": {
+                "Exercise Questions": [
+                  {
+                    "id": 1,
+                    "question": "Explain the different types of software maintenance."
+                  },
+                  {
+                    "id": 2,
+                    "question": "Describe the various phases of the Software Development Life Cycle (SDLC)."
+                  },
+                  {
+                    "id": 3,
+                    "question": "Discuss the importance of requirement gathering and analysis in software development."
+                  },
+                  {
+                    "id": 4,
+                    "question": "Explain the concept of software frameworks and their role in application development."
+                  },
+                  {
+                    "id": 5,
+                    "question": "Compare and contrast different software development models, such as Waterfall, Agile, and Spiral."
+                  },
+                  {
+                    "id": 6,
+                    "question": "Describe the key components of a comprehensive project plan for a software development project."
+                  },
+                  {
+                    "id": 7,
+                    "question": "Discuss various techniques for estimating the cost of a software project."
+                  }
+                ],
+                "Pastpapers Questions": [
+                  {
+                    "id": 1,
+                    "question": "Explain the different types of software maintenance."
+                  },
+                  {
+                    "id": 2,
+                    "question": "Describe the various phases of the Software Development Life  Cycle (SDLC)."
+                  },
+                  {
+                    "id": 3,
+                    "question": "Discuss the importance of requirement gathering and analysis in software development."
+                  },
+                  {
+                    "id": 4,
+                    "question": "Explain the concept of software frameworks and their role in application development."
+                  },
+                  {
+                    "id": 5,
+                    "question": "Compare and contrast different software development models, such as Waterfall, Agile, and Spiral."
+                  },
+                  {
+                    "id": 6,
+                    "question": "Describe the key components of a comprehensive project plan for a software development project."
+                  },
+                  {
+                    "id": 7,
+                    "question": "Discuss various techniques for estimating the cost of a software project."
+                  }
+                ],
+                "Additional Questions": [
+                  {
+                    "id": 1,
+                    "question": "Explain the different types of software maintenance."
+                  },
+                  {
+                    "id": 2,
+                    "question": "Describe the various phases of the Software Development Life Cycle (SDLC)."
+                  },
+                  {
+                    "id": 3,
+                    "question": "Discuss the importance of requirement gathering and analysis in software development."
+                  },
+                  {
+                    "id": 4,
+                    "question": "Explain the concept of software frameworks and their role in application development."
+                  },
+                  {
+                    "id": 5,
+                    "question": "Compare and contrast different software development models, such as Waterfall, Agile, and Spiral."
+                  },
+                  {
+                    "id": 6,
+                    "question": "Describe the key components of a comprehensive project plan for a software development project."
+                  },
+                  {
+                    "id": 7,
+                    "question": "Discuss various techniques for estimating the cost of a software project."
+                  }
+                ]
+              }
+            },
+
+            {
+              "chapters": [
                 {
+                  "id": 1,
                   "name": "Software Development Life Cycle (SDLC)",
 
                   "topics": [
                     {
-                      "id": 1.1,
+                      "id": 1,
                       "name": "SDLC Fundamentals",
 
                       "questionTypes": {
@@ -1571,553 +3161,22 @@
                             {
                               "name": "Pastpapers Questions",
                               "questions": [
-                                {"id": 1,"question": "What is touch screen?"},
-                                {"id": 2,"question": "Define barcode reader."},
+                                {
+                                  "id": 1,
+                                  "question": "What is touch screen?"
+                                },
+                                {
+                                  "id": 2,
+                                  "question": "Define barcode reader."
+                                },
                                 { "id": 3, "question": "What is webcam?" },
                                 { "id": 4, "question": "Define joystick." },
                                 { "id": 5, "question": "What is trackball?" },
                                 { "id": 6, "question": "Define plotter." },
-                                {"id": 7, "question": "What is motherboard chipset?"},
-                                { "id": 8, "question": "Define CMOS battery." },
-                                { "id": 9, "question": "What is LAN card?" }
-                              ]
-                            },
-
-                            {
-                              "name": "Additional Questions",
-                              "questions": [
-                                {
-                                  "id": 1,
-                                  "question": "What is touch screen?"
-                                },
-                                {
-                                  "id": 2,
-                                  "question": "Define barcode reader."
-                                },
-                                { "id": 3, "question": "What is webcam?" }
-                              ]
-                            }
-                          ]
-                        }
-                      }
-                    },{
-                      "id": 1.2,
-                      "name": "SDLC Fundamentals topic 02",
-
-                      "questionTypes": {
-                        "mcqs": {
-                          "categories": [
-                            {
-                              "name": "Exercise Questions",
-                              "questions": [
-                                {
-                                  "q_no": 1,
-                                  "question": "Primary purpose of the Software Development Life Cycle (SDLC) is to:",
-                                  "options": {
-                                    "A": "Design websites",
-                                    "B": "Deliver high-quality software within time and cost estimates",
-                                    "C": "Manage database systems",
-                                    "D": "Create hardware components"
-                                  }
-                                },
-                                {
-                                  "q_no": 2,
-                                  "question": "A type of requirement specifies system performance:",
-                                  "options": {
-                                    "A": "Functional Requirements",
-                                    "B": "Non-Functional Requirements",
-                                    "C": "Technical Requirements",
-                                    "D": "Operational Requirements"
-                                  }
-                                },
-                                {
-                                  "q_no": 3,
-                                  "question": "Role of a framework in the context of SDLC is to:",
-                                  "options": {
-                                    "A": "Write code from scratch",
-                                    "B": "Provide a structured foundation with predefined components and architectures",
-                                    "C": "Manage hardware",
-                                    "D": "Perform manual testing"
-                                  }
-                                },
-                                {
-                                  "q_no": 4,
-                                  "question": "Software development model involving short cycles or sprints:",
-                                  "options": {
-                                    "A": "Waterfall Model",
-                                    "B": "Agile Methodology",
-                                    "C": "Lean Software Development",
-                                    "D": "Scrum"
-                                  }
-                                },
-                                {
-                                  "q_no": 5,
-                                  "question": "Crucial aspect of comprehensive project planning:",
-                                  "options": {
-                                    "A": "Understanding the project scope and tasks",
-                                    "B": "Deciding the project’s colour scheme",
-                                    "C": "Hiring a large development team",
-                                    "D": "Ignoring potential risks"
-                                  }
-                                },
-                                {
-                                  "q_no": 6,
-                                  "question": "Factor does not influence the cost estimation of a software project:",
-                                  "options": {
-                                    "A": "Scope of the project",
-                                    "B": "Technology stack",
-                                    "C": "Number of meetings held",
-                                    "D": "Operational costs"
-                                  }
-                                },
-                                {
-                                  "q_no": 7,
-                                  "question": "An action needed during Python installation to run from the command line more easily:",
-                                  "options": {
-                                    "A": "Uncheck \"Add Python to PATH\"",
-                                    "B": "Choose a different IDE",
-                                    "C": "Check \"Add Python to PATH\"",
-                                    "D": "Install only the IDE"
-                                  }
-                                },
-                                {
-                                  "q_no": 8,
-                                  "question": "A valid variable name in Python is",
-                                  "options": {
-                                    "A": "variable 1",
-                                    "B": "1variable",
-                                    "C": "variable-name",
-                                    "D": "variable name"
-                                  }
-                                },
-                                {
-                                  "q_no": 9,
-                                  "question": "Output of the below code is: age = 25; print(\"Age:\", age)",
-                                  "options": {
-                                    "A": "Age: 25",
-                                    "B": "25",
-                                    "C": "Age",
-                                    "D": "age"
-                                  }
-                                },
-                                {
-                                  "q_no": 10,
-                                  "question": "The operator is used for exponentiation in Python is:",
-                                  "options": {
-                                    "A": "*",
-                                    "B": "**",
-                                    "C": "//",
-                                    "D": "/"
-                                  }
-                                },
-                                {
-                                  "q_no": 11,
-                                  "question": "A loop used to iterate over a collection such as lists is:",
-                                  "options": {
-                                    "A": "while",
-                                    "B": "for",
-                                    "C": "do-while",
-                                    "D": "repeat"
-                                  }
-                                },
-                                {
-                                  "q_no": 12,
-                                  "question": "A keyword is used to define a function in Python:",
-                                  "options": {
-                                    "A": "define",
-                                    "B": "function",
-                                    "C": "def",
-                                    "D": "func"
-                                  }
-                                },
-                                {
-                                  "q_no": 13,
-                                  "question": "The output of the following code is: temperature, humidity, wind_speed = 25, 60, 15 print(\"Hot and humid\" if temperature > 30 and humidity > 50 else \"Warm and breezy\" if temperature == 25 and wind_speed > 10 else \"Cool and dry\" if temperature < 20 and humidity < 30 else \"Moderate\")",
-                                  "options": {
-                                    "A": "Hot",
-                                    "B": "Warm and breezy",
-                                    "C": "Cool",
-                                    "D": "Nothing"
-                                  }
-                                },
-                                {
-                                  "q_no": 14,
-                                  "question": "The operation used to combine two lists in Python:",
-                                  "options": {
-                                    "A": "combine()",
-                                    "B": "concat()",
-                                    "C": "+",
-                                    "D": "merge()"
-                                  }
-                                },
-                                {
-                                  "q_no": 15,
-                                  "question": "Which of the following is a key advantage of using a framework in software development?",
-                                  "options": {
-                                    "A": "Speed",
-                                    "B": "Flexibility",
-                                    "C": "Scalability",
-                                    "D": "Testing"
-                                  }
-                                },
-                                {
-                                  "q_no": 16,
-                                  "question": "Which of these best describes a software framework?",
-                                  "options": {
-                                    "A": "Set of instructions",
-                                    "B": "Set of languages",
-                                    "C": "Set of tools",
-                                    "D": "Translator"
-                                  }
-                                },
-                                {
-                                  "q_no": 17,
-                                  "question": "Which SDLC phase aims to collect information about user needs?",
-                                  "options": {
-                                    "A": "Testing",
-                                    "B": "Requirement Gathering",
-                                    "C": "Implementation",
-                                    "D": "Design"
-                                  }
-                                },
-                                {
-                                  "q_no": 18,
-                                  "question": "The outcome of the requirement phase is:",
-                                  "options": {
-                                    "A": "Test plan",
-                                    "B": "Design diagrams",
-                                    "C": "Requirement Specification Document",
-                                    "D": "Source code"
-                                  }
-                                },
-                                {
-                                  "q_no": 19,
-                                  "question": "Who is mainly responsible for collecting requirement?",
-                                  "options": {
-                                    "A": "Developer",
-                                    "B": "Tester",
-                                    "C": "Analyst",
-                                    "D": "Network Engineer"
-                                  }
-                                },
-                                {
-                                  "q_no": 20,
-                                  "question": "Requirement Gathering is also known as:",
-                                  "options": {
-                                    "A": "Deployment",
-                                    "B": "Planning",
-                                    "C": "Analysis",
-                                    "D": "Debugging"
-                                  }
-                                },
-                                {
-                                  "q_no": 21,
-                                  "question": "Which of the following best describes a functional requirement?",
-                                  "options": {
-                                    "A": "The system must be maintainable",
-                                    "B": "The system must allow users to log in using credentials",
-                                    "C": "The system should load in 3 seconds",
-                                    "D": "The interface should be modern and stylish"
-                                  }
-                                }
-                              ]
-                            },
-                            {
-                              "name": "Pastpapers Questions",
-                              "questions": [
-                                {
-                                  "q_no": 101,
-                                  "question": "What is the correct way to declare a variable in Python?",
-                                  "options": {
-                                    "A": "var myVar = 10",
-                                    "B": "myVar : int = 10",
-                                    "C": "myVar = 10",
-                                    "D": "int myVar = 10"
-                                  }
-                                },
-                                {
-                                  "q_no": 102,
-                                  "question": "What will be the output of the following code? x = 5 y = x y += 2 print(x, y)",
-                                  "options": {
-                                    "A": "5 7",
-                                    "B": "7 7",
-                                    "C": "5 5",
-                                    "D": "7 5"
-                                  }
-                                },
-                                {
-                                  "q_no": 103,
-                                  "question": "Which operator is used for floor division in Python?",
-                                  "options": {
-                                    "A": "/",
-                                    "B": "//",
-                                    "C": "%",
-                                    "D": "**"
-                                  }
-                                },
-                                {
-                                  "q_no": 104,
-                                  "question": "Which of these gives True only when both conditions are True?",
-                                  "options": {
-                                    "A": "or",
-                                    "B": "not",
-                                    "C": "and",
-                                    "D": "=="
-                                  }
-                                },
-                                {
-                                  "q_no": 119,
-                                  "question": "What does this Python code print? age = 20 print(\"Teen\" if age < 18 else \"Adult\")",
-                                  "options": {
-                                    "A": "Teen",
-                                    "B": "Adult",
-                                    "C": "Error",
-                                    "D": "20"
-                                  }
-                                },
-                                {
-                                  "q_no": 120,
-                                  "question": "Which of the following statements about if-else is FALSE?",
-                                  "options": {
-                                    "A": "It runs both blocks always",
-                                    "B": "Only one block runs",
-                                    "C": "It helps in decision-making",
-                                    "D": "It runs else if the condition is false"
-                                  }
-                                },
-                                {
-                                  "q_no": 121,
-                                  "question": "Which of the following best defines a Control Structure in programming?",
-                                  "options": {
-                                    "A": "Flow rule",
-                                    "B": "Repeat code",
-                                    "C": "Code flow control",
-                                    "D": "It controls the flow of instructions in a program."
-                                  }
-                                },
-                                {
-                                  "q_no": 122,
-                                  "question": "What will be the output of this code? x = 10 if x < 5: print(\"Smart\") print(\"Done\")",
-                                  "options": {
-                                    "A": "Small",
-                                    "B": "Done",
-                                    "C": "Small Done",
-                                    "D": "Error"
-                                  }
-                                },
-                                {
-                                  "q_no": 123,
-                                  "question": "The keyword elif in Python is used for:",
-                                  "options": {
-                                    "A": "Ending loop",
-                                    "B": "Multiple conditions",
-                                    "C": "Infinite loop",
-                                    "D": "Loop termination"
-                                  }
-                                },
-                                {
-                                  "q_no": 124,
-                                  "question": "Which structure lets Python repeat a block of code?",
-                                  "options": {
-                                    "A": "Looping",
-                                    "B": "Jumping",
-                                    "C": "Conditional",
-                                    "D": "Returning repeatedly"
-                                  }
-                                },
-                                {
-                                  "q_no": 125,
-                                  "question": "What type of loop runs based on a condition?",
-                                  "options": {
-                                    "A": "for",
-                                    "B": "while",
-                                    "C": "both",
-                                    "D": "None"
-                                  }
-                                },
-                                {
-                                  "q_no": 126,
-                                  "question": "What will this print: n = 1 while n < 4: print(n) n += 1",
-                                  "options": {
-                                    "A": "0 1 2",
-                                    "B": "1 2 3",
-                                    "C": "1 2 3 4",
-                                    "D": "Infinite loop"
-                                  }
-                                },
-                                {
-                                  "q_no": 127,
-                                  "question": "What will be the output of the following code? count = 0 while count < 5: print(count, end=' ') count +=2 else: print(\"Done\")",
-                                  "options": {
-                                    "A": "0 1 2 3 4 Done",
-                                    "B": "0 2 4 Done",
-                                    "C": "0 2 4",
-                                    "D": "0 1 2 3 4"
-                                  }
-                                },
-                                {
-                                  "q_no": 128,
-                                  "question": "Why are default parameters useful in Python functions?",
-                                  "options": {
-                                    "A": "To avoid runtime errors",
-                                    "B": "To reuse variables",
-                                    "C": "To handle missing arguments",
-                                    "D": "To define global variables"
-                                  }
-                                },
-                                {
-                                  "q_no": 129,
-                                  "question": "How many arguments will be used in this function call: greet() if the function is def greet(name = \"Guest\")?",
-                                  "options": {
-                                    "A": "Two",
-                                    "B": "One",
-                                    "C": "Zero",
-                                    "D": "Infinite"
-                                  }
-                                },
-                                {
-                                  "q_no": 130,
-                                  "question": "Why are modules used in large Python programs?",
-                                  "options": {
-                                    "A": "To reduce memory",
-                                    "B": "To avoid syntax errors",
-                                    "C": "To organize code into parts",
-                                    "D": "To increase complexity"
-                                  }
-                                },
-                                {
-                                  "q_no": 131,
-                                  "question": "Which function will return the largest number from a list?",
-                                  "options": {
-                                    "A": "max()",
-                                    "B": "sum()",
-                                    "C": "large()",
-                                    "D": "sort()"
-                                  }
-                                },
-                                {
-                                  "q_no": 132,
-                                  "question": "How does Python know which module belongs to which package?",
-                                  "options": {
-                                    "A": "By naming it",
-                                    "B": "By folder structure",
-                                    "C": "Using comments",
-                                    "D": "Manually assigning"
-                                  }
-                                },
-                                {
-                                  "q_no": 133,
-                                  "question": "What will be the output of this code? import random print(random.randint(1, 1))",
-                                  "options": {
-                                    "A": "Error",
-                                    "B": "Random number",
-                                    "C": "1",
-                                    "D": "None"
-                                  }
-                                }
-                             
-                              ]
-                            }
-                          ]
-                        },
-
-                        "shorts": {
-                          "categories": [
-                            {
-                              "name": "Exercise Questions",
-                              "questions": [
-                                { "id": 1, "question": "Define computer." },
-                                {
-                                  "id": 2,
-                                  "question": "Write four components of a computer system."
-                                },
-                                {
-                                  "id": 3,
-                                  "question": "Differentiate between data and information."
-                                },
-                                { "id": 4, "question": "What is IPO cycle?" },
-                                { "id": 5, "question": "Define processing." },
-                                {
-                                  "id": 6,
-                                  "question": "What is storage device?"
-                                },
                                 {
                                   "id": 7,
-                                  "question": "Define digital computer."
+                                  "question": "What is motherboard chipset?"
                                 },
-                                {
-                                  "id": 8,
-                                  "question": "What is output device?"
-                                },
-                                {
-                                  "id": 9,
-                                  "question": "Write two examples of input devices."
-                                },
-                                { "id": 10, "question": "What is CPU?" }
-                              ]
-                            },
-                            {
-                              "name": "Pastpapers Questions",
-                              "questions": [
-                                {
-                                  "id": 1,
-                                  "question": "What is the full form of CPU?"
-                                },
-                                {
-                                  "id": 2,
-                                  "question": "Write two examples of output devices."
-                                },
-                                {
-                                  "id": 3,
-                                  "question": "What is the function of RAM?"
-                                },
-                                { "id": 4, "question": "Define software." },
-                                {
-                                  "id": 5,
-                                  "question": "What is the difference between hardware and software?"
-                                },
-                                {
-                                  "id": 6,
-                                  "question": "What is the function of an operating system  (OS)?"
-                                }
-                              ]
-                            },
-                            {
-                              "name": "Additional Questions",
-                              "questions": [
-                                { "id": 1, "question": "What is booting?" },
-                                { "id": 2, "question": "Define BIOS." },
-                                { "id": 3, "question": "What is motherboard?" }
-                              ]
-                            }
-                          ]
-                        },
-
-                        "longs": {
-                          "categories": [
-                            {
-                              "name": "Exercise Questions",
-                              "questions": [
-                                {
-                                  "id": 1,
-                                  "question": "What is touch screen?"
-                                },
-                                {
-                                  "id": 2,
-                                  "question": "Define barcode reader."
-                                },
-                                { "id": 3, "question": "What is webcam?" },
-                                { "id": 4, "question": "Define joystick." },
-                                { "id": 5, "question": "What is trackball?" }
-                              ]
-                            },
-                            {
-                              "name": "Pastpapers Questions",
-                              "questions": [
-                                {"id": 1,"question": "What is touch screen?"},
-                                {"id": 2,"question": "Define barcode reader."},
-                                                                { "id": 6, "question": "Define plotter." },
-                                {"id": 7, "question": "What is motherboard chipset?"},
                                 { "id": 8, "question": "Define CMOS battery." },
                                 { "id": 9, "question": "What is LAN card?" }
                               ]
@@ -2142,7 +3201,9 @@
                       }
                     }
                   ]
-                },
+                }
+              ]
+            },
             { "name": "Requirement Gathering and Analysis", "MCQs": [] },
             { "name": "Design and Implementation", "MCQs": [] },
             { "name": "Testing and Deployment", "MCQs": [] },
@@ -2248,7 +3309,7 @@
           ]
         }
       ]
-},
+    },
     {
       "id": "11",
       "title": "11th",
