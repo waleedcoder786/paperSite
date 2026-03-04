@@ -21,7 +21,7 @@ import axios from "axios";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://backendrepoo-production.up.railway.app/api/classes";
 
 interface Paper {
   id: string;
