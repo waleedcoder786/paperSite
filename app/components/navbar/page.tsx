@@ -47,7 +47,7 @@ function Sidebar() {
   const menuItems = allMenuItems.filter((item) => {
     // 1. Agar Role 'teacher' hai
     if (userRole === "teacher") {
-      const teacherRestricted = ["Teachers", "Users", "Settings", "AddData"];
+      const teacherRestricted = ["Teachers", "Users", "Settings", "AddData", "removeData"];
       return !teacherRestricted.includes(item.name);
     }
     if (userRole === "superadmin") {
