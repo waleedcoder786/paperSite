@@ -127,7 +127,8 @@ export default function DashboardPage() {
       return allStats.filter(stat => ['Users', 'Add Data', 'Remove Data'].includes(stat.label));
     }
     if (loggedUser?.role === 'admin') {
-      return allStats.filter(stat => !['Users', 'Add Data'].includes(stat.label));
+      return allStats.filter(stat => !['Users', 'Add Data', 'Remove Data'].includes(stat.label));
+
     }
     return allStats;
   }, [savedPapers, savedTec, loggedUser, allUsers]);
