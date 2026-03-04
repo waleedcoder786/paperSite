@@ -36,7 +36,7 @@ const DeleteManager = ({ onClose, onSuccess }: DeleteManagerProps) => {
   const [selCategory, setSelCategory] = useState("Exercise Questions");
 
 //   const API_URL = "http://localhost:5000/api/classes";
-const API_URL = "https://backendrepoo-production.up.railway.app/api";
+const API_URL = "https://backendrepoo-production.up.railway.app/api/classes";
 
 
   const fetchLatestData = async () => {
