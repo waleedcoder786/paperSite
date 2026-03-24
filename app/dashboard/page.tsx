@@ -17,13 +17,8 @@ import Header from "../components/topbar/page";
 import axios from "axios";
 import { PlusCircle } from "lucide-react";
 
-<<<<<<< HEAD
-const API_BASE = "http://localhost:5000/api";
-// const API_BASE = "https://backendrepoo-production.up.railway.app/api";
-=======
 // const API_BASE = "http://localhost:5000/api";
 const API_BASE = "https://backendrepoo-production.up.railway.app/api";
->>>>>>> b0af0f2e53f2601deefa8496934ef3f28a428667
 
 interface User {
   id?: string;
@@ -133,10 +128,6 @@ export default function DashboardPage() {
     }
     if (loggedUser?.role === 'admin') {
       return allStats.filter(stat => !['Users', 'Add Data', 'Remove Data'].includes(stat.label));
-<<<<<<< HEAD
-=======
-
->>>>>>> b0af0f2e53f2601deefa8496934ef3f28a428667
     }
     return allStats;
   }, [savedPapers, savedTec, loggedUser, allUsers]);

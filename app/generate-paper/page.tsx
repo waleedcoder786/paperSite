@@ -8,6 +8,7 @@ import toast, { Toaster } from 'react-hot-toast';
 
 const API_BASE = "https://backendrepoo-production.up.railway.app/api";
 
+
 export default function GeneratePaper() {
   // --- State Management ---
   const [step, setStep] = useState(0); 
