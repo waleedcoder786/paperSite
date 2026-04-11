@@ -16,7 +16,8 @@ function Page() {
     role: "",
   });
 
-  const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
+  const API_BASE = "/api";
+  // const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
   // const API_BASE = "http://localhost:5000";
 
   const pathname = usePathname().split("/").pop()?.replace(/-/g, " ");
@@ -98,7 +99,7 @@ function Page() {
   return (
     <div className="w-full bg-slate-50">
       {/* --- RESPONSIVE HEADER --- */}
-      <header className="h-20 md:h-24 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 md:px-10 sticky top-0 z-40">
+      <header className="h-20 md:h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 md:px-10 sticky top-0 z-40">
         <div className="flex flex-col">
           <h1 className="text-lg md:text-xl font-black text-slate-800 tracking-tight capitalize truncate max-w-[150px] md:max-w-none">
             {pathname} Overview
@@ -111,7 +112,7 @@ function Page() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 md:gap-6">
+        {/* <div className="flex items-center gap-3 md:gap-6">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-black text-slate-800 leading-none capitalize">
               {user.name || "User"}
@@ -122,7 +123,7 @@ function Page() {
           </div>
 
           {/* Avatar / Trigger */}
-          <div
+          {/* <div
             onClick={() => setIsModalOpen(true)}
             className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-slate-100 border-2 border-white shadow-lg overflow-hidden ring-2 md:ring-4 ring-slate-50 transition-transform hover:scale-105 cursor-pointer flex-shrink-0"
           >
@@ -133,8 +134,8 @@ function Page() {
                 {user.name ? user.name.charAt(0) : "U"}
               </div>
             )}
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */} 
       </header>
 
       {/* --- RESPONSIVE MODAL --- */}

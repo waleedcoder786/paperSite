@@ -18,7 +18,8 @@ import Link from "next/link";
 import axios from "axios";
 import { PaperHeader } from "../../components/headers"; 
 
-const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
+// const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
+const API_BASE = "/api";
 // const API_BASE = "http://localhost:5000/api"; 
 
 // --- HELPER COMPONENT: Auto-Resizing Textarea ---

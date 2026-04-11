@@ -13,8 +13,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // const API_BASE = "http://localhost:5000/api"; 
-  const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
+  const API_BASE = "/api/auth"; 
+  // const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
   // const API_BASE = "https://backendrepoo-production.up.railway.app/api"; 
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -131,7 +131,7 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center">
                 <p className="text-xs text-gray-400">
-                    Don't have an account? <Link href="/register" className="text-blue-600 font-bold hover:underline">Register your Institute</Link>
+                    Don't have an account? <Link href="/register" className="text-blue-600 font-bold hover:underline">Register your DemoAccount</Link>
                 </p>
             </div>
           </div>

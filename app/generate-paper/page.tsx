@@ -6,21 +6,25 @@ import PaperPreview from '../paper/page';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 
-const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
-
+// const API_BASE = "https://testbackend-production-69cb.up.railway.app/api/classes";
+const API_BASE = "api/classes";
 
 export default function GeneratePaper() {
+  // Mapping backend keys to the logos you provided
+  const BOARD_LOGOS: Record<string, string> = {
+    punjab: "https://www.biselahore.com/images/logos/biselogo.png",
+    Federal: "https://upload.wikimedia.org/wikipedia/en/2/25/FBISE_Islamabad_%28logo%29.png"
+  };
+
   // --- State Management ---
   const [step, setStep] = useState(0); 
   const [loading, setLoading] = useState(true);
   const [showPreview, setShowPreview] = useState(false);
   
-  // Data State
   const [fullRawData, setFullRawData] = useState<any>(null);
   const [classes, setClasses] = useState<any[]>([]);
   const [fullData, setFullData] = useState<Record<string, any>>({});
   
-  // Selection State
   const [selection, setSelection] = useState({
     board: null as string | null,
     classId: null as string | null,
@@ -37,7 +41,6 @@ export default function GeneratePaper() {
         setLoading(true);
         const { data: response } = await axios.get(`${API_BASE}`);
         
-        // Handling MongoDB structure: response[0].data format
         const actualData = Array.isArray(response) 
           ? (response[0]?.data || response[0]) 
           : (response?.data || response);
@@ -61,17 +64,21 @@ export default function GeneratePaper() {
 
     const boardData = fullRawData[boardKey];
     
-    // Federal check fix: Ensure boardData exists AND classes array is not empty
     if (!boardData || !boardData.classes || boardData.classes.length === 0) {
-      toast.error(`No classes found in ${boardKey} board. Please add data from admin.`);
+      toast.error(`No classes found in ${boardData?.name || boardKey}.`);
       return;
     }
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    let user: any = {};
+    try {
+      user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (e) {
+      console.warn("Could not parse user.");
+    }
+
     const allBoardClasses = boardData.classes || [];
     const isAdmin = ['admin', 'superadmin'].includes(user.role);
 
-    // Filter classes based on user access
     const filteredClasses = isAdmin 
       ? allBoardClasses 
       : allBoardClasses.filter((c: any) => user.classes?.includes(c.title))
@@ -82,13 +89,12 @@ export default function GeneratePaper() {
           .filter((c: any) => c.subjects?.length > 0);
 
     if (filteredClasses.length === 0 && !isAdmin) {
-        toast.error("You don't have access to classes in this board");
+        toast.error("Access denied for this board");
         return;
     }
 
     setClasses(filteredClasses);
     const dataMap = filteredClasses.reduce((acc: any, curr: any) => {
-      // Use id or title as key for mapping
       const key = curr.id || curr.title;
       acc[key] = curr;
       return acc;
@@ -103,18 +109,11 @@ export default function GeneratePaper() {
     return selection.classId ? (fullData[selection.classId]?.subjects || []) : [];
   }, [selection.classId, fullData]);
 
-  // --- Navigation Handlers ---
+  // --- Navigation ---
   const handleBack = () => {
-    if (step === 3) {
-      setStep(2);
-      setSelection(prev => ({ ...prev, chapters: [], topics: [], subject: null }));
-    } else if (step === 2) {
-      setStep(1);
-      setSelection(prev => ({ ...prev, classId: null, className: null }));
-    } else if (step === 1) {
-      setStep(0);
-      setSelection(prev => ({ ...prev, board: null }));
-    }
+    if (step === 3) setStep(2);
+    else if (step === 2) setStep(1);
+    else if (step === 1) setStep(0);
   };
 
   const toggleChapter = (chapterObj: any) => {
@@ -140,7 +139,6 @@ export default function GeneratePaper() {
       const newTopics = prev.topics.includes(topicName) 
         ? prev.topics.filter(t => t !== topicName) 
         : [...prev.topics, topicName];
-      
       return { ...prev, chapters: newChapters, topics: newTopics };
     });
   };
@@ -158,12 +156,11 @@ export default function GeneratePaper() {
   }
 
   return (
-    <div className="h-screen w-screen bg-slate-50 flex overflow-hidden font-sans">
+    <div className="h-screen w-screen bg-slate-50 flex overflow-hidden font-sans text-slate-900">
       <Toaster position="top-center"/>
       <Navbar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header Section */}
         <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 z-10 shadow-sm">
           <div className="flex items-center gap-4">
             {step > 0 && (
@@ -171,7 +168,7 @@ export default function GeneratePaper() {
                 <FaArrowLeft />
               </button>
             )}
-            <h1 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+            <h1 className="text-xl font-black uppercase tracking-tight">
               {step === 0 ? 'Select Board' : step === 3 ? selection.subject?.name : step === 2 ? `${selection.className} Subjects` : 'Select Class'}
             </h1>
           </div>
@@ -189,26 +186,23 @@ export default function GeneratePaper() {
           {loading ? (
             <div className="h-full flex flex-col items-center justify-center space-y-4">
                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-               <p className="font-black text-slate-400 uppercase tracking-widest">Fetching Resources...</p>
+               <p className="font-black text-slate-400 uppercase tracking-widest">Loading Boards...</p>
             </div>
           ) : (
             <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
               
               {/* STEP 0: BOARD SELECTION */}
-              {step === 0 && (
+              {step === 0 && fullRawData && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-10">
-                  <BoardCard 
-                    title="Punjab Board" 
-                    sub="BISE Lahore, Multan, etc."
-                    color="from-emerald-600 to-teal-400"
-                    onClick={() => handleBoardSelect('punjab')} 
-                  />
-                  <BoardCard 
-                    title="Federal Board" 
-                    sub="FBISE Islamabad"
-                    color="from-blue-600 to-indigo-500"
-                    onClick={() => handleBoardSelect('federal')} 
-                  />
+                  {Object.entries(fullRawData).map(([boardKey, boardData]: [string, any], index) => (
+                    <BoardCard 
+                      key={boardKey}
+                      title={boardData.name || boardKey}
+                      sub={`${boardData.classes?.length || 0} Classes Available`}
+                      logo={BOARD_LOGOS[boardKey]}
+                      onClick={() => handleBoardSelect(boardKey)} 
+                    />
+                  ))}
                 </div>
               )}
 
@@ -244,12 +238,12 @@ export default function GeneratePaper() {
                 </div>
               )}
 
-              {/* STEP 3: CHAPTERS & TOPICS */}
+              {/* STEP 3: CONTENT SELECTION */}
               {step === 3 && (
                 <div className="space-y-6 pb-20">
                   <div className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur py-4 flex justify-between items-center border-b border-slate-200">
                     <div>
-                      <h2 className="text-2xl font-black text-slate-800">Select Content</h2>
+                      <h2 className="text-2xl font-black">Select Chapters & Topics</h2>
                       <div className="flex gap-3 mt-1">
                         <Badge color="blue">Chapters: {selection.chapters.length}</Badge>
                         <Badge color="green">Topics: {selection.topics.length}</Badge>
@@ -265,7 +259,7 @@ export default function GeneratePaper() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selection.subject.chapters.map((chapter: any, idx: number) => (
+                    {selection.subject?.chapters?.map((chapter: any, idx: number) => (
                       <ChapterAccordion 
                         key={idx}
                         index={idx}
@@ -287,15 +281,19 @@ export default function GeneratePaper() {
   );
 }
 
-// --- Internal Components (Original CSS kept) ---
+// --- Internal Components ---
 
-const BoardCard = ({ title, sub, color, onClick }: any) => (
+const BoardCard = ({ title, sub, logo, onClick }: any) => (
   <div 
     onClick={onClick} 
-    className="group relative bg-white rounded-3xl p-10 border border-slate-200 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer flex flex-col items-center text-center"
+    className="group bg-white rounded-3xl p-10 border border-slate-200 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer flex flex-col items-center text-center"
   >
-    <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white shadow-lg mb-6 group-hover:scale-110 transition-transform`}>
-      <FaUniversity size={35} />
+    <div className="w-24 h-24 rounded-2xl bg-white p-3 shadow-lg mb-6 group-hover:scale-110 transition-transform flex items-center justify-center border border-slate-50">
+      {logo ? (
+        <img src={logo} alt={title} className="w-full h-full object-contain" />
+      ) : (
+        <FaUniversity size={40} className="text-blue-600" />
+      )}
     </div>
     <h3 className="text-2xl font-black text-slate-800 mb-2">{title}</h3>
     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">{sub}</p>
@@ -310,7 +308,7 @@ const ClassCard = ({ item, onClick }: any) => (
     onClick={onClick} 
     className="group relative bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer h-72"
   >
-    <img src={item.img || item.image} className="absolute inset-0 w-full h-full object-cover grayscale opacity-10 group-hover:opacity-30 group-hover:scale-110 transition-all duration-700" alt={item.title} />
+    <img src={item.img || item.image || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover grayscale opacity-10 group-hover:opacity-30 group-hover:scale-110 transition-all duration-700" alt={item.title} />
     <div className="relative p-8 h-full flex flex-col justify-between z-10">
       <div>
         <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.color || 'from-blue-600 to-blue-400'} flex items-center justify-center text-white shadow-lg mb-4`}>
@@ -331,14 +329,13 @@ const SubjectCard = ({ sub, onClick }: any) => (
     <div className="aspect-video rounded-xl bg-slate-100 mb-4 overflow-hidden">
       <img src={sub.image || 'https://via.placeholder.com/150'} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={sub.name} />
     </div>
-    <h3 className="text-lg font-black text-slate-800 text-center pb-2">{sub.name}</h3>
+    <h3 className="text-lg font-black text-center pb-2">{sub.name}</h3>
   </div>
 );
 
 const ChapterAccordion = ({ chapter, index, isSelected, selectedTopics, onToggleChapter, onToggleTopic }: any) => {
   const chapterName = chapter.name || chapter;
   const topics = chapter.topics || [];
-
   return (
     <div className={`rounded-2xl border transition-all ${isSelected ? 'border-blue-400 bg-white shadow-md' : 'border-slate-200 bg-white/50'}`}>
       <div onClick={onToggleChapter} className={`p-4 cursor-pointer flex items-center justify-between ${isSelected ? 'bg-blue-50/50' : ''}`}>

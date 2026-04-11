@@ -43,10 +43,8 @@ export default function QuestionMenuModal({
   const [filterOnlySelected, setFilterOnlySelected] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(false);
 
-  
-
-  const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
-  
+  // const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
+  const API_BASE = "/api";
 
   const toggleSource = (val: string) => {
     if (val === 'All') {
@@ -99,69 +97,98 @@ export default function QuestionMenuModal({
     try {
       const response = await axios.get(`${API_BASE}/classes`);
       let rootData = response.data;
-      if (Array.isArray(rootData)) rootData = rootData[0];
-      const chaptersSource = rootData.classes || rootData.chaptersData || [];
-      const classKey = className.replace(/\D/g, ''); 
-      const classData = chaptersSource.find((c: any) => String(c.id) === classKey);
+      
+      // Handling MongoDB Wrapper Structure
+      if (Array.isArray(rootData)) {
+          rootData = rootData[0]?.data || rootData[0];
+      }
 
-      if (!classData) {
-        toast.error(`Class ${className} not found.`);
+      // Step 1: Find Board from local storage or default to Punjab
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const boardKey = Object.keys(rootData).find(key => 
+        key.toLowerCase() === (user.board || 'punjab').toLowerCase()
+      ) || Object.keys(rootData)[0]; // Fallback to first board if not found
+
+      const boardData = rootData[boardKey];
+      if (!boardData || !boardData.classes) {
+        toast.error("Board data structure is invalid.");
         return;
       }
 
+      // Step 2: Find Class (Flexible match for "9th" vs "9")
+      const classData = boardData.classes.find((c: any) => 
+        String(c.title).toLowerCase().trim() === className.toLowerCase().trim() ||
+        String(c.id) === className.replace(/\D/g, '')
+      );
+
+      if (!classData) {
+        toast.error(`Class ${className} not found in ${boardKey}.`);
+        return;
+      }
+
+      // Step 3: Find Subject
       const targetSubject = classData.subjects?.find((sub: any) => 
           sub.name.toLowerCase().trim() === subjectName.toLowerCase().trim()
       );
       
-      if (targetSubject?.chapters) {
-        let allQuestions: any[] = [];
-        const filteredChapters = targetSubject.chapters.filter((ch: any) => 
-          chapters.includes(ch.name || ch)
-        );
+      if (!targetSubject?.chapters) {
+        toast.error("Subject or chapters not found.");
+        return;
+      }
 
-        filteredChapters.forEach((chapter: any) => {
-          if (chapter.topics && Array.isArray(chapter.topics)) {
-            const topicsToProcess = topics && topics.length > 0 
-              ? chapter.topics.filter((t: any) => topics.includes(t.name || t))
-              : chapter.topics;
+      let allQuestions: any[] = [];
+      
+      // Step 4: Filter Selected Chapters
+      const filteredChapters = targetSubject.chapters.filter((ch: any) => 
+        chapters.includes(ch.name || ch)
+      );
 
-            topicsToProcess.forEach((topic: any) => {
-              const typeKey = Object.keys(topic.questionTypes || {}).find(k => 
-                k.toLowerCase().startsWith(selectedType.toLowerCase().substring(0, 3))
-              );
+      filteredChapters.forEach((chapter: any) => {
+        if (chapter.topics && Array.isArray(chapter.topics)) {
+          // If topics are selected, only process those. Else process all topics in selected chapter.
+          const topicsToProcess = (topics && topics.length > 0) 
+            ? chapter.topics.filter((t: any) => topics.includes(t.name || t))
+            : chapter.topics;
 
-              if (typeKey && topic.questionTypes[typeKey]) {
-                const typeData = topic.questionTypes[typeKey];
-                if (typeData.categories && Array.isArray(typeData.categories)) {
-                  const matchedCats = typeData.categories.filter((cat: any) => 
-                    selectedSource.includes(cat.name.trim())
-                  );
-                  matchedCats.forEach((c: any) => {
-                    if (c.questions) allQuestions = [...allQuestions, ...c.questions];
-                  });
-                }
+          topicsToProcess.forEach((topic: any) => {
+            // Find key starting with 'MCQ', 'Sho', 'Lon'
+            const typeKey = Object.keys(topic.questionTypes || {}).find(k => 
+              k.toLowerCase().startsWith(selectedType.toLowerCase().substring(0, 3))
+            );
+
+            if (typeKey && topic.questionTypes[typeKey]) {
+              const typeData = topic.questionTypes[typeKey];
+              if (typeData.categories && Array.isArray(typeData.categories)) {
+                // Category Filter (Exercise, etc)
+                const matchedCats = typeData.categories.filter((cat: any) => 
+                  selectedSource.includes(cat.name.trim())
+                );
+                matchedCats.forEach((c: any) => {
+                  if (c.questions) allQuestions = [...allQuestions, ...c.questions];
+                });
               }
-            });
-          }
-        });
-
-        if (allQuestions.length === 0) {
-          toast.error(`Selected sources do not contain any ${selectedType}.`);
-        } else {
-          const questionsWithTags = allQuestions.map((q, i) => ({ 
-            ...q, 
-            type: selectedType.toLowerCase(),
-            marks: defaultMarks, 
-            tempId: `${selectedType}-${i}-${Math.random().toString(36).substr(2, 5)}`
-          }));
-          
-          setDisplayQuestions(questionsWithTags);
-          setViewMode('selection');
-          setFilterOnlySelected(false);
+            }
+          });
         }
+      });
+
+      if (allQuestions.length === 0) {
+        toast.error(`No questions found for the selected criteria.`);
+      } else {
+        const questionsWithTags = allQuestions.map((q, i) => ({ 
+          ...q, 
+          type: selectedType.toLowerCase(),
+          marks: defaultMarks, 
+          tempId: `${selectedType}-${i}-${Math.random().toString(36).substr(2, 5)}`
+        }));
+        
+        setDisplayQuestions(questionsWithTags);
+        setViewMode('selection');
+        setFilterOnlySelected(false);
       }
     } catch (error) {
-      toast.error("Database connection error.");
+      console.error(error);
+      toast.error("Failed to connect to the database.");
     } finally {
       setIsLoading(false);
     }
@@ -222,7 +249,7 @@ export default function QuestionMenuModal({
               </div>
 
               <div className="flex flex-col gap-2 lg:col-span-2">
-                <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Source Material (Select Multiple)</label>
+                <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Source Material</label>
                 <div className="flex flex-wrap gap-2">
                   {["Exercise Questions", "Additional Questions", "Pastpapers Questions"].map((src) => (
                     <button
@@ -237,10 +264,7 @@ export default function QuestionMenuModal({
                       {src === "Pastpapers Questions" ? "Past Papers" : src}
                     </button>
                   ))}
-                  <button
-                    onClick={() => toggleSource('All')}
-                    className="px-4 py-3 rounded-xl text-[11px] font-black uppercase border-2 border-dashed border-slate-300 text-slate-400 hover:border-blue-600 hover:text-blue-600 transition-all"
-                  >
+                  <button onClick={() => toggleSource('All')} className="px-4 py-3 rounded-xl text-[11px] font-black uppercase border-2 border-dashed border-slate-300 text-slate-400 hover:border-blue-600 hover:text-blue-600 transition-all">
                     Select All
                   </button>
                 </div>
@@ -265,7 +289,6 @@ export default function QuestionMenuModal({
                        className="bg-white border-2 border-slate-100 rounded-xl p-4 font-bold outline-none focus:border-blue-600 text-slate-700 shadow-sm" />
               </div>
               
-              {/* Layout Columns Filter Logic */}
               {!selectedType.toLowerCase().includes('mcq') && (
                 <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
                   <label className="text-[11px] font-black text-purple-600 uppercase ml-1">Qs Per Row</label>
@@ -299,7 +322,6 @@ export default function QuestionMenuModal({
               </div>
             </div>
 
-            {/* Questions Grid with Column Logic Applied */}
             <div className={`grid gap-4 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar mb-6 ${layoutCols === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
               {visibleQuestions.map((q, idx) => {
                 const isSelected = tempSelected.some(item => item.tempId === q.tempId);

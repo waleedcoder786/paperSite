@@ -1,184 +1,120 @@
 "use client";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  FaFileAlt,
-  FaSave,
-  FaHistory,
-  FaChalkboardTeacher,
-  FaArrowRight,
-  FaPlus,
-  FaTrashAlt,
-  FaUsers
-
+  FaFileAlt, FaSave, FaHistory, FaChalkboardTeacher,
+  FaArrowRight, FaPlus, FaTrashAlt, FaUsers
 } from "react-icons/fa";
 import Navbar from "../components/navbar/page";
 import Header from "../components/topbar/page";
 import axios from "axios";
 import { PlusCircle } from "lucide-react";
 
-// const API_BASE = "http://localhost:5000/api";
-const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
-
-interface User {
-  id?: string;
-  _id?: string;
-  role?: string;
-  [key: string]: any;
-}
+// const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
+const API_BASE = "/api";
 
 export default function DashboardPage() {
   const router = useRouter();
-
-  const [savedPapers, setSavedPapers] = useState<any[]>([]);
-  const [savedTec, setSavedTec] = useState<any[]>([]);
-  const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [loggedUser, setLoggedUser] = useState<User | null>(null);
+  const [data, setData] = useState<{ papers: any[]; teachers: any[]; users: any[] }>({ papers: [], teachers: [], users: [] });
+  const [loggedUser, setLoggedUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    
-    const storedUserString = localStorage.getItem('user');
-    const storedUser = storedUserString ? JSON.parse(storedUserString) : null;
-    setLoggedUser(storedUser);
+  // 1. Optimized Fetching with AbortController
+  const fetchDashboardData = useCallback(async (user: any, signal: AbortSignal) => {
+    try {
+      const userId = user.id || user._id;
+      const responses = await Promise.allSettled([
+        axios.get(`${API_BASE}/papers`, { params: { userId }, signal }),
+        user.role !== 'teacher' ? axios.get(`${API_BASE}/teachers`, { signal }) : Promise.resolve({ data: [] }),
+        user.role === 'superadmin' ? axios.get(`${API_BASE}/users`, { signal }) : Promise.resolve({ data: [] })
+      ]);
 
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
-      
-      if (!storedUser) {
-        setIsLoading(false);
-        return;
-      }
-
-      const currentUserId = storedUser.id || storedUser._id;
-      
-      try {
-        const papersPromise = axios.get(`${API_BASE}/papers`, {
-          params: { userId: currentUserId },
-          signal: abortController.signal
-        });
-
-        let teachersPromise = Promise.resolve({ data: [] });
-        if (storedUser.role !== 'teacher') {
-          teachersPromise = axios.get(`${API_BASE}/teachers`, {
-             signal: abortController.signal
-          });
-        }
-
-        let usersPromise = Promise.resolve({ data: [] });
-        if (storedUser.role === 'superadmin') {
-          usersPromise = axios.get(`${API_BASE}/users`, {
-             signal: abortController.signal
-          });
-        }
-
-        const [papersRes, teachersRes, usersRes] = await Promise.all([
-          papersPromise, 
-          teachersPromise, 
-          usersPromise
-        ]);
-
-        setSavedPapers(papersRes.data || []);
-        setSavedTec(teachersRes.data || []);
-        setAllUsers(usersRes.data || []);
-
-      } catch (err) {
-        if (!axios.isCancel(err)) {
-          console.error("Dashboard Fetch error:", err);
-        }
-      } finally {
-        // Round animation ko feel karne ke liye 1 sec delay
-        setTimeout(() => setIsLoading(false), 1000);
-      }
-    };
-    
-    fetchDashboardData();
-
-    return () => abortController.abort();
+      setData({
+        papers: responses[0].status === 'fulfilled' ? (responses[0].value as any).data : [],
+        teachers: responses[1].status === 'fulfilled' ? (responses[1].value as any).data : [],
+        users: responses[2].status === 'fulfilled' ? (responses[2].value as any).data : []
+      });
+    } catch (err) {
+      if (!axios.isCancel(err)) console.error("Fetch error");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    const storedUser = typeof window !== "undefined" ? localStorage.getItem('user') : null;
+    
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setLoggedUser(parsedUser);
+      fetchDashboardData(parsedUser, controller.signal);
+    } else {
+      router.replace("/auth/login");
+    }
+    return () => controller.abort();
+  }, [fetchDashboardData, router]);
+
+  // 2. Static Stats Calculation (Lag-Free)
   const filteredStats = useMemo(() => {
-    const currentId = loggedUser?.id || loggedUser?._id;
-
-    //  Filter 1: Admin ko sirf uske apne banaye huye teachers dikhenge
-    const myTeachersCount = savedTec.filter(
-      (teacher) => String(teacher.adminId) === String(currentId)
-    ).length;
-
-    //  Filter 2: Users card mein sirf unki count ho jin ka role 'admin' ho
-    const adminsCount = allUsers.filter(user => user.role === 'admin').length;
-
-    const allStats = [
-      { label: 'Generate Paper', value: savedPapers.length || 0, color: 'bg-blue-500', textCol: 'text-blue-500', lightColor: 'bg-blue-100/50', icon: <FaPlus />, path: '/generate-paper' },
-      { label: 'Saved Papers', value: savedPapers.length || 0, color: 'bg-emerald-500', textCol: 'text-emerald-500', lightColor: 'bg-emerald-100/50', icon: <FaSave />, path: '/saved-papers' },
-      { label: 'Past Papers', value: 'Punjab', color: 'bg-purple-500', textCol: 'text-purple-500', lightColor: 'bg-purple-100/50', icon: <FaHistory />, path: '/past-papers' },
-      { label: 'Total Teachers', value: myTeachersCount || 0, color: 'bg-indigo-500', textCol: 'text-indigo-500', lightColor: 'bg-indigo-100/50', icon: <FaChalkboardTeacher />, path: '/teachers' },
-      { label: 'Paper History', value: '0', color: 'bg-cyan-500', textCol: 'text-cyan-500', lightColor: 'bg-cyan-100/50', icon: <FaFileAlt />, path: '/paper-history' },
-      { label: 'Users', value: adminsCount || 0, color: 'bg-slate-700', textCol: 'text-slate-700', lightColor: 'bg-slate-200/50', icon: <FaUsers />, path: '/users' },
-      { label: 'Add Data', value: "DB", color: 'bg-orange-500', textCol: 'text-orange-500', lightColor: 'bg-orange-100/50', icon: <PlusCircle />, path: '/add-data' },
-      { label: 'Remove Data', value: "DB", color: 'bg-red-500', textCol: 'text-red-500', lightColor: 'bg-red-100/50', icon: <FaTrashAlt />, path: '/removeData' },
+    if (!loggedUser) return [];
+    const currentId = loggedUser.id || loggedUser._id;
+    
+    const stats = [
+      { label: 'Generate Paper', value: data.papers.length, color: 'bg-blue-500', textCol: 'text-blue-500', lightColor: 'bg-blue-50/80', icon: <FaPlus />, path: '/generate-paper' },
+      { label: 'Saved Papers', value: data.papers.length, color: 'bg-emerald-500', textCol: 'text-emerald-500', lightColor: 'bg-emerald-50/80', icon: <FaSave />, path: '/saved-papers' },
+      { label: 'Past Papers', value: 'Punjab', color: 'bg-purple-500', textCol: 'text-purple-500', lightColor: 'bg-purple-50/80', icon: <FaHistory />, path: '/past-papers' },
+      { label: 'Total Teachers', value: data.teachers.filter(t => String(t.adminId) === String(currentId)).length, color: 'bg-indigo-500', textCol: 'text-indigo-500', lightColor: 'bg-indigo-50/80', icon: <FaChalkboardTeacher />, path: '/teachers' },
+      { label: 'Users', value: data.users.filter((u: any) => u.role === 'admin').length, color: 'bg-slate-700', textCol: 'text-slate-700', lightColor: 'bg-slate-100/80', icon: <FaUsers />, path: '/users' },
+      { label: 'Add Data', value: "DB", color: 'bg-orange-500', textCol: 'text-orange-500', lightColor: 'bg-orange-50/80', icon: <PlusCircle />, path: '/add-data' },
+      { label: 'Remove Data', value: "DB", color: 'bg-red-500', textCol: 'text-red-500', lightColor: 'bg-red-50/80', icon: <FaTrashAlt />, path: '/removeData' },
     ];
 
-    if (loggedUser?.role === 'teacher') {
-      return allStats.filter(stat => ['Generate Paper', 'Saved Papers', 'Past Papers', 'Paper History'].includes(stat.label));
-    }
-    if (loggedUser?.role === 'superadmin') {
-      return allStats.filter(stat => ['Users', 'Add Data', 'Remove Data'].includes(stat.label));
-    }
-    if (loggedUser?.role === 'admin') {
-      return allStats.filter(stat => !['Users', 'Add Data', 'Remove Data'].includes(stat.label));
-    }
-    return allStats;
-  }, [savedPapers, savedTec, loggedUser, allUsers]);
+    const role = loggedUser.role;
+    if (role === 'teacher') return stats.filter(s => ['Generate Paper', 'Saved Papers', 'Past Papers'].includes(s.label));
+    if (role === 'superadmin') return stats.filter(s => ['Users', 'Add Data', 'Remove Data'].includes(s.label));
+    if (role === 'admin') return stats.filter(s => !['Users', 'Add Data', 'Remove Data'].includes(s.label));
+    return stats;
+  }, [data, loggedUser]);
 
   return (
-    <div className="h-screen w-full bg-[#f0f4f8] flex flex-col md:flex-row font-sans relative overflow-hidden">
-      
-      <div className="hidden sm:block absolute top-[-10%] right-[-5%] w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 pointer-events-none"></div>
-      <div className="hidden sm:block absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 pointer-events-none"></div>
-
+    <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden font-sans antialiased">
       <Navbar />
 
-      <main className="flex-1 flex flex-col min-w-0 h-full relative z-10 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 bg-transparent relative overflow-hidden">
         <Header />
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 lg:p-12 custom-scrollbar">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-7xl mx-auto pb-10">
-              {filteredStats.map((stat, index) => (
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar scroll-smooth">
+          <div className="max-w-7xl mx-auto pb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {filteredStats.map((stat, idx) => (
                 <div
-                  key={index}
+                  key={idx}
                   onClick={() => router.push(stat.path)}
-                  className="group relative cursor-pointer"
+                  className="group relative cursor-pointer will-change-transform"
                 >
-                  <div
-                    className={`relative z-20 bg-white p-6 sm:p-8 h-48 sm:h-56 lg:h-60 flex flex-col justify-between
+                  {/* Original Unique Shape */}
+                  <div className={`relative z-20 bg-white p-6 sm:p-8 h-48 sm:h-56 lg:h-60 flex flex-col justify-between
                     rounded-[30px_10px_30px_10px] sm:rounded-[40px_10px_40px_10px]
-                    border-[3px] border-transparent ${stat.lightColor}
-                    shadow-lg transition-all duration-300 
-                    hover:-translate-y-2 hover:shadow-2xl hover:border-white
-                    overflow-hidden`}
+                    border-2 border-transparent ${stat.lightColor}
+                    shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] transition-all duration-200
+                    hover:-translate-y-1 hover:shadow-xl hover:border-white overflow-hidden`}
                   >
-                    <div className={`absolute -bottom-10 -right-10 w-24 h-24 sm:w-32 sm:h-32 ${stat.color} opacity-10 blur-2xl rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
-
-                    <div className="flex justify-between items-start relative z-10">
-                      <div className={`w-12 h-12 sm:w-16 sm:h-16 ${stat.color} text-white rounded-full flex items-center justify-center shadow-lg text-xl sm:text-2xl transform group-hover:rotate-12 transition-transform duration-300`}>
+                    <div className="flex justify-between items-start">
+                      <div className={`w-12 h-12 sm:w-16 sm:h-16 ${stat.color} text-white rounded-full text-lg flex items-center justify-center shadow-lg transition-transform group-hover:scale-110`}>
                         {stat.icon}
                       </div>
-                      <div className={`flex items-center gap-1 sm:gap-2 text-[10px] sm:text-sm font-bold text-slate-400 group-hover:${stat.textCol} transition-colors uppercase tracking-widest`}>
-                        <span className="hidden xs:block">Explore</span>
+                      <div className={`flex items-center gap-2 text-[10px] font-bold text-slate-400 group-hover:${stat.textCol} transition-colors uppercase tracking-widest`}>
+                        <span>Explore</span>
                         <FaArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
 
-                    <div className="relative z-10">
-                      <h3 className="text-sm sm:text-lg font-bold text-slate-500 uppercase tracking-wider mb-1">
-                        {stat.label}
-                      </h3>
-                      <div className="flex items-center gap-2 h-10">
+                    <div>
+                      <h3 className="text-md sm:text-md font-bold text-slate-500 uppercase tracking-widest mb-1">{stat.label}</h3>
+                      <div className="h-10 flex items-center">
                         {isLoading ? (
-                          // Round Spinner matching card theme
-                          <div className={`w-7 h-7 border-4 border-slate-200 border-t-current ${stat.textCol} rounded-full animate-spin`}></div>
+                          <div className={`w-6 h-6 border-2 border-slate-200 border-t-current ${stat.textCol} rounded-full animate-spin`} />
                         ) : (
                           <span className={`text-2xl sm:text-4xl font-black text-slate-800 tracking-tighter group-hover:${stat.textCol} transition-colors`}>
                             {stat.value}
@@ -187,27 +123,21 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
-                  <div className={`absolute inset-0 z-10 rounded-[35px_15px_35px_15px] ${stat.color} opacity-10 blur-xl translate-y-4 scale-95 group-hover:translate-y-6 group-hover:scale-100 transition-all duration-300`}></div>
+                  
+                  {/* Background Blur Overlay (Optimized) */}
+                  <div className={`absolute inset-0 z-10 rounded-[40px_10px_40px_10px] ${stat.color} opacity-5 blur-xl group-hover:opacity-10 transition-opacity`} />
                 </div>
               ))}
             </div>
+          </div>
         </div>
       </main>
 
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
       `}</style>
     </div>
   );

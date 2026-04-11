@@ -10,14 +10,15 @@ import QuestionMenuModal from '../components/QuestionMenuModal/page';
 import toast from 'react-hot-toast';
 
 // const BACKEND_URL = "http://localhost:5000/api/papers";
-const BACKEND_URL = "https://testbackend-production-69cb.up.railway.app/api/papers";
+// const BACKEND_URL = "https://testbackend-production-69cb.up.railway.app/api/papers";
+const BACKEND_URL = "/api/papers";
 
 
 interface PaperPreviewProps {
     className: string;
     subject: any;
     chapters: string[];
-    topics: string[]; 
+    topics: string[];  
     onClose: () => void;
 }
 
