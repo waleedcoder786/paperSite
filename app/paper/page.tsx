@@ -9,16 +9,13 @@ import Navbar from '../components/navbar/page';
 import QuestionMenuModal from '../components/QuestionMenuModal/page';
 import toast from 'react-hot-toast';
 
-// const BACKEND_URL = "http://localhost:5000/api/papers";
-// const BACKEND_URL = "https://testbackend-production-69cb.up.railway.app/api/papers";
-const BACKEND_URL = "/api/papers";
-
+const BACKEND_URL = "http://localhost:5000/api/papers";
 
 interface PaperPreviewProps {
     className: string;
     subject: any;
     chapters: string[];
-    topics: string[];  
+    topics: string[]; // <--- Added topics to props
     onClose: () => void;
 }
 

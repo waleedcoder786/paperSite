@@ -35,8 +35,7 @@ const WhiteAdminPanel = () => {
     options: { A: "", B: "", C: "", D: "" }
   });
 
-  // const API_URL = "https://testbackend-production-69cb.up.railway.app/api/classes";
-  const API_URL = "/api/classes"; // DEV URL
+  const API_URL = "api/classes";
 
   useEffect(() => {
     fetchDB();
@@ -77,6 +76,8 @@ const WhiteAdminPanel = () => {
 
   const handleSaveManual = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Basic Validations
     if (!formData.board) return toast.error("Please select or enter a Board!");
     if (!formData.classId) return toast.error("Please select or enter a Class!");
     if (!formData.subjectName) return toast.error("Please select or enter a Subject!");
@@ -85,10 +86,48 @@ const WhiteAdminPanel = () => {
     if (!formData.question.trim()) return toast.error("Question cannot be empty!");
     if (type === 'mcq' && !formData.answer) return toast.error("Select the correct answer!");
 
+    // ✅ DUPLICATION CHECK LOGIC
+    if (rawDbData && formData.board) {
+      const boardData = rawDbData[formData.board.toLowerCase().trim()];
+      
+      if (boardData) {
+        // 1. Check Class Duplicate
+        const existingClass = boardData.classes?.find((c: any) => c.id === formData.classId.trim());
+        if (isNewClass && existingClass) {
+          return toast.error(`Class "${formData.classId}" already availiable`);
+        }
+
+        if (existingClass) {
+          // 2. Check Subject Duplicate
+          const existingSubject = existingClass.subjects?.find((s: any) => s.name.toLowerCase() === formData.subjectName.toLowerCase().trim());
+          if (isNewSubject && existingSubject) {
+            return toast.error(`Subject "${formData.subjectName}" in class mein pehle se hai!`);
+          }
+
+          if (existingSubject) {
+            // 3. Check Chapter Duplicate
+            const existingChapter = existingSubject.chapters?.find((ch: any) => 
+              (typeof ch === 'string' ? ch.toLowerCase() : ch.name.toLowerCase()) === formData.chapterName.toLowerCase().trim()
+            );
+            if (isNewChapter && existingChapter) {
+              return toast.error(`Chapter "${formData.chapterName}" pehle se add hai!`);
+            }
+
+            if (existingChapter) {
+              // 4. Check Topic Duplicate
+              const existingTopic = existingChapter.topics?.find((t: any) => t.name.toLowerCase() === formData.topic.toLowerCase().trim());
+              if (isNewTopic && existingTopic) {
+                return toast.error(`Topic "${formData.topic}" is chapter mein pehle se hai!`);
+              }
+            }
+          }
+        }
+      }
+    }
+
     setLoading(true);
     try {
-      await axios.post(`${API_URL}/add-question`, {
-        // FIXED: Dynamically use the selected board rather than hardcoding "punjab"
+      await axios.post(`${API_URL}`, {
         board: formData.board.toLowerCase().trim(),
         classId: formData.classId,
         subjectName: formData.subjectName,
@@ -144,7 +183,7 @@ const WhiteAdminPanel = () => {
             D: row['D'] || row['option_d'] || '',
           };
         }
-        return axios.post(`${API_URL}/add-question`, {
+        return axios.post(`${API_URL}`, {
           board: formData.board.toLowerCase().trim(),
           classId: formData.classId,
           subjectName: formData.subjectName,

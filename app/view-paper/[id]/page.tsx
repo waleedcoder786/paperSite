@@ -5,8 +5,8 @@ import Link from "next/link";
 import axios from "axios";
 import { PaperHeader } from "../../components/headers";
 
-const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
-// const API_BASE = "http://localhost:5000/api"; 
+// const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
+const API_BASE = "/api"; 
 
 // --- Types for better DX ---
 interface Question {
@@ -23,9 +23,9 @@ interface Batch {
     attempt?: number;
   };
 }
-
 export default function ViewPaperPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+  const resolvedParams = use(params); // Params ko resolve karein
+  const id = resolvedParams.id;
 
   const [paperData, setPaperData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -47,9 +47,15 @@ export default function ViewPaperPage({ params }: { params: Promise<{ id: string
   });
 
   useEffect(() => {
-    const fetchPaper = async () => {
+   const fetchPaper = async () => {
+      // Safety check: Agar id nahi hai to call na karein
+      if (!id) return;
+
       try {
+        setLoading(true);
+        // Ensure path matches your folder: app/api/papers/[id]/route.ts
         const res = await axios.get(`${API_BASE}/papers/${id}`);
+        
         if (res.data) {
           const data = res.data;
           const processedData = {
@@ -66,16 +72,21 @@ export default function ViewPaperPage({ params }: { params: Promise<{ id: string
           setPaperData(processedData);
           if (data.style) setStyles((prev) => ({ ...prev, ...data.style }));
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching paper:", err);
-        setError("Failed to load the paper. Please check your connection.");
+        // Agar backend se 404 aaye to specific message dikhayein
+        if (err.response?.status === 404) {
+          setError("Paper not found in database.");
+        } else {
+          setError("Failed to load the paper. Please check your API route.");
+        }
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchPaper();
-  }, [id]);
 
+    fetchPaper();
+  }, [id]); // Dependency array mein id lazmi rakhein
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
       <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />

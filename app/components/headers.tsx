@@ -31,14 +31,31 @@ export const PaperHeader = ({ type, info, styles, onChangeLogo }: HeaderProps) =
   
 
 
-  const Logo = () => (
-    <div onClick={onChangeLogo} className="cursor-pointer group relative print:opacity-100 shrink-0">
-      <img src={displaySchoolLogo} alt="logo" className="w-20 h-20 object-contain" />
-      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded text-[8px] text-white transition-opacity font-bold print:hidden">
-        CHANGE
+  const Logo = () => {
+    // Agar logo empty hai, to render hi na karein (ya fallback icon dikhayein)
+    if (!displaySchoolLogo || displaySchoolLogo.trim() === "") {
+      return (
+        <div onClick={onChangeLogo} className="w-20 h-20 border-2 border-dashed border-slate-300 rounded flex items-center justify-center cursor-pointer hover:bg-slate-50 print:hidden shrink-0">
+          <span className="text-[10px] text-slate-400 font-bold">ADD LOGO</span>
+        </div>
+      );
+    }
+
+    return (
+      <div onClick={onChangeLogo} className="cursor-pointer group relative print:opacity-100 shrink-0">
+        <img 
+          src={displaySchoolLogo} 
+          alt="logo" 
+          className="w-20 h-20 object-contain" 
+          // Agar image load na ho to blank dikhaye bajaye poora page reload karne ke
+          onError={(e) => { e.currentTarget.style.display = 'none'; }} 
+        />
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded text-[8px] text-white transition-opacity font-bold print:hidden">
+          CHANGE
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const fieldLabel = "font-bold text-[12px] uppercase";
   const displayDate = info?.paperDate || info?.date || "___/___/202__";

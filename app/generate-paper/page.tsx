@@ -6,8 +6,7 @@ import PaperPreview from '../paper/page';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 
-// const API_BASE = "https://testbackend-production-69cb.up.railway.app/api/classes";
-const API_BASE = "api/classes";
+const API_BASE = "/api/classes";
 
 export default function GeneratePaper() {
   // Mapping backend keys to the logos you provided

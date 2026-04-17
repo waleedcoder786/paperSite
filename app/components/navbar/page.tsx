@@ -2,8 +2,19 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  FaHome, FaFileAlt, FaSave, FaHistory, FaCog, FaUsers,
-  FaChalkboardTeacher, FaTrashAlt, FaShieldAlt
+  FaBars,
+  FaChevronLeft,
+  FaHome,
+  FaFileAlt,
+  FaSave,
+  FaHistory,
+  FaCog,
+  FaShieldAlt,
+  FaUsers,
+  FaSignOutAlt,
+  FaEye, FaTrashAlt,
+  FaChalkboardTeacher,
+  FaTimes, 
 } from "react-icons/fa";
 import { PlusCircle, Crown, Calendar, Zap, LogOut, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -42,33 +53,56 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
     }
   }, []);
 
-  // Sync Sidebar State with Parent
-  useEffect(() => {
-    if (onToggle) onToggle(isOpen);
-  }, [isOpen, onToggle]);
+  const allMenuItems = [
+    { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
+    { name: "Generate Paper", icon: <FaFileAlt />, path: "/generate-paper" },
+    { name: "Saved Paper", icon: <FaSave />, path: "/saved-papers" },
+    { name: "Teachers", icon: <FaChalkboardTeacher />, path: "/teachers" },
+    { name: "Past Papers", icon: <FaHistory />, path: "/past-papers" },
+    { name: "Users", icon: <FaUsers />, path: "/users" },
+    { name: "Settings", icon: <FaCog />, path: "/settings" },
+    { name: "AddData", icon: <PlusCircle />, path: "/add-data" }, 
+    { name: "removeData", icon: <FaTrashAlt/>, path: "/removeData" }, 
+    { name: "View Data", icon: <FaEye />, path: "/view-data" }, 
+  ];
 
-  // Memoized Menu Items for Performance
-  const menuItems = useMemo(() => {
-    const allItems = [
-      { name: "Dashboard", icon: <FaHome size={18} />, path: "/dashboard" },
-      { name: "Generate Paper", icon: <FaFileAlt size={18} />, path: "/generate-paper" },
-      { name: "Saved Paper", icon: <FaSave size={18} />, path: "/saved-papers" },
-      { name: "Teachers", icon: <FaChalkboardTeacher size={18} />, path: "/teachers" },
-      { name: "Past Papers", icon: <FaHistory size={18} />, path: "/past-papers" },
-      { name: "Users", icon: <FaUsers size={18} />, path: "/users" },
-      { name: "Add Data", icon: <PlusCircle size={18} />, path: "/add-data" },
-      { name: "Remove Data", icon: <FaTrashAlt size={18} />, path: "/removeData" },
-      { name: "Settings", icon: <FaCog size={18} />, path: "/settings" },
-    ];
+  const menuItems = allMenuItems.filter((item) => {
+    // 1. Agar Role 'teacher' hai
+    if (userRole === "teacher") {
+      const teacherRestricted = ["Teachers", "Users", "Settings", "AddData"];
+      return !teacherRestricted.includes(item.name);
+    }
+    if (userRole === "superadmin") {
+      const teacherRestricted = [
+        "Saved Paper",
+        "Teachers",
+        "Settings",
+        "Generate Paper",
+        "Past Papers",
+      ];
+      return !teacherRestricted.includes(item.name);
+    }
+    // 2. Agar Role 'subadmin' hai (Admin table se aane wale users)
+    if (userRole === "admin") {
+      return (
+        item.name !== "Users" &&
+        item.name !== "AddData" &&
+        item.name !== "removeData" &&
+        item.name !== "View Data" &&
+        item.name !== "Settings"
+      );
+    }
+    // 3. Agar Role 'superadmin' hai
+    if (userRole === "superadmin") {
+      return true; // Super admin ko sab nazar aayega (including 'Users')
+    }
+    if (item.name === "Users") return false;
+    return true;
+  });
 
-    return allItems.filter((item) => {
-      if (!userRole) return true;
-      if (userRole === "teacher") return !["Teachers", "Users", "Settings", "Add Data", "Remove Data"].includes(item.name);
-      if (userRole === "superadmin") return !["Saved Paper", "Teachers", "Settings", "Generate Paper", "Past Papers"].includes(item.name);
-      if (userRole === "admin") return !["Users", "Add Data", "Remove Data", "Settings"].includes(item.name);
-      return true;
-    });
-  }, [userRole]);
+  const handleCardClick = (path: string) => {
+    router.push(path);
+  };
 
    const handleLogout = () => {
     document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
@@ -90,7 +124,7 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
       `}
     >
       {/* 1. Brand Section */}
-      <div className="flex items-center h-20 px-6 flex-shrink-0">
+      <div className="flex items-center h-20 px-6 flex-shrink-0 border-b border-slate-800/40">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white">
             <FaShieldAlt size={20} />
@@ -101,31 +135,37 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
         </div>
       </div>
 
-      {/* 2. Navigation Section */}
-      <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto no-scrollbar border-t border-slate-800/50">
-        {menuItems.map((item) => {
-          const isActive = pathname === item.path;
-          return (
-            <button
-              key={item.name}
-              onClick={() => router.push(item.path)}
-              className={`
-                w-full flex items-center gap-4 px-3.5 py-3 rounded-xl text-[13px] cursor-pointer font-semibold transition-all group
-                ${isActive 
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" 
-                  : "hover:bg-slate-800/50 hover:text-slate-100"}
-              `}
-            >
-              <span className={`transition-transform duration-300 flex-shrink-0 ${isActive ? "scale-110" : "group-hover:scale-110 text-slate-500"}`}>
-                {item.icon}
-              </span>
-              <span className={`whitespace-nowrap transition-opacity duration-300 ${!isOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
-                {item.name}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+        {/* Navigation Items */}
+        <nav className="flex-1 px-3 space-y-2 overflow-y-auto custom-scrollbar">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.path;
+            return (
+              <button
+                key={item.name}
+                onClick={() => handleCardClick(item.path)}
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group relative overflow-hidden ${
+                  isActive
+                    ? "bg-blue-600 text-white shadow-xl shadow-blue-600/20"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                } ${!isOpen && "md:px-4"}`}
+              >
+                <span
+                  className={`text-xl flex-shrink-0 ${isActive ? "text-white" : "group-hover:text-white"}`}
+                >
+                  {item.icon}
+                </span>
+                {/* Mobile par hamesha text dikhe agar open ho, desktop par collapse logic chale */}
+                <span className="whitespace-nowrap ml-2">{item.name}</span>
+                {/* Tooltip (Only for desktop when collapsed) */}
+                {isOpen && (
+                  <div className="hidden   md:block absolute left-16 bg-slate-800 text-white text-[10px] px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-2xl whitespace-nowrap z-50 uppercase tracking-widest border border-slate-700">
+                    {item.name}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
       {/* 3. Account Status Card */}
       <div className={`mx-3 mb-3 p-4 rounded-2xl bg-slate-900/60 border border-slate-800/60 transition-all duration-300 ${!isOpen ? "opacity-0 invisible h-0" : "opacity-100 visible h-auto"}`}>
