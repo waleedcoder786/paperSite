@@ -146,7 +146,7 @@ function SavedPapersPage() {
   };
 
   return (
-    <div className="relative flex h-screen w-screen bg-[#F8FAFC] font-sans">
+    <div className="relative flex h-screen w-screen bg-[#F8FAFC] font-sans overflow-hidden text-slate-900">
       <Navbar />
 
       {/* Delete Confirmation Modal */}

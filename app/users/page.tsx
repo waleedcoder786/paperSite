@@ -8,15 +8,14 @@ import toast from 'react-hot-toast';
 import { 
   HiOutlineX, HiOutlinePhone, HiOutlineLockClosed, 
   HiOutlineUser, HiOutlineMail, HiOutlineOfficeBuilding, 
-  HiOutlineBadgeCheck, HiOutlineLocationMarker, HiOutlinePhotograph,
-  HiChevronLeft, HiChevronRight, HiSearch
+  HiOutlineBadgeCheck, HiOutlineLocationMarker,
+  HiChevronLeft, HiChevronRight, HiSearch, HiOutlineLightningBolt, HiOutlineShieldCheck
 } from 'react-icons/hi';
 import {
   Trash2, Edit, ChevronDown, ChevronUp, GraduationCap, 
-  AlertTriangle, UserPlus
+  AlertTriangle, UserPlus, Crown
 } from 'lucide-react';
 
-// API BASE URL
 const API_URL = '/api';
 
 export default function UsersPage() {
@@ -32,10 +31,11 @@ export default function UsersPage() {
   const [editingAdminId, setEditingAdminId] = useState<string | null>(null);
   const [deletingItem, setDeletingItem] = useState<{ id: string; type: 'users' | 'teachers' } | null>(null);
 
-  // --- Search & Pagination States ---
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+
+  const [selectedPlan, setSelectedPlan] = useState('basic');
 
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', institute: '', 
@@ -77,24 +77,99 @@ export default function UsersPage() {
     }
   };
 
-  // --- Filtered Data & Pagination Logic ---
+  const calculateExpiry = (plan: string) => {
+    let date = new Date();
+    if (plan === 'basic') date.setMonth(date.getMonth() + 3);
+    else if (plan === 'pro') date.setFullYear(date.getFullYear() + 1);
+    else if (plan === 'premier') date.setFullYear(date.getFullYear() + 3);
+    return date.toISOString();
+  };
+
+  // --- VALIDATION LOGIC (Add Only, No Style Removal) ---
+  const validateForm = () => {
+    if (formData.name.trim().length < 4) {
+      toast.error("Name must be at least 4 characters");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Invalid email format");
+      return false;
+    }
+    const phoneRegex = /^[0-9]{11}$/;
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
+      toast.error("Phone must be exactly 11 digits");
+      return false;
+    }
+    if (!editingAdminId || formData.password) {
+      if (formData.password.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        return false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        toast.error("Passwords do not match");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    try {
+      const expiryDate = calculateExpiry(selectedPlan);
+      const { confirmPassword, ...dataPayload } = formData;
+      
+      const payload = { 
+        ...dataPayload, 
+        planType: selectedPlan,
+        accessType: selectedPlan === 'basic' ? 'half' : 'full',
+        expiryDate: expiryDate 
+      };
+
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+      if (editingAdminId) {
+        await axios.put(`${API_URL}/users/${editingAdminId}`, payload);
+        toast.success('Admin updated successfully');
+      } else {
+        await axios.post(`${API_URL}/users`, payload);
+        toast.success(`Registered with ${selectedPlan.toUpperCase()} plan`);
+      }
+
+      setIsFormOpen(false);
+      fetchData(user.id || user._id);
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Email already exists or server error';
+      toast.error(errorMsg);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingItem) return;
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      await axios.delete(`${API_URL}/${deletingItem.type}/${deletingItem.id}`);
+      toast.success('Record Deleted Successfully');
+      setIsDeleteModalOpen(false);
+      fetchData(user.id || user._id); 
+    } catch {
+      toast.error('Deletion failed');
+    }
+  };
+
   const filteredAdmins = subAdmins.filter(admin => 
     admin.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     admin.institute.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentAdmins = filteredAdmins.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
-  };
+  const currentAdmins = filteredAdmins.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const openCreateForm = () => {
     setEditingAdminId(null);
+    setSelectedPlan('basic');
     setFormData({ 
         name: '', email: '', phone: '', institute: '', 
         watermark: '', address: '', logo: '', 
@@ -106,6 +181,7 @@ export default function UsersPage() {
 
   const openEditForm = (admin: any) => {
     setEditingAdminId(admin.id);
+    setSelectedPlan(admin.planType || 'basic');
     setFormData({
       ...admin,
       watermark: admin.watermark || '',
@@ -114,45 +190,6 @@ export default function UsersPage() {
       confirmPassword: admin.password 
     });
     setIsFormOpen(true);
-  };
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) return toast.error('Passwords do not match');
-
-    try {
-      const { confirmPassword, ...payload } = formData;
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-      if (editingAdminId) {
-        await axios.put(`${API_URL}/users/${editingAdminId}`, payload);
-        toast.success('Admin updated successfully');
-      } else {
-        await axios.post(`${API_URL}/users`, payload);
-        toast.success('Admin registered successfully');
-      }
-
-      setIsFormOpen(false);
-      fetchData(user.id || user._id);
-    } catch {
-      toast.error('Operation failed');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!deletingItem) return;
-    try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const deleteUrl = `${API_URL}/${deletingItem.type}/${deletingItem.id}`;
-      const res = await axios.delete(deleteUrl);
-      if (res.status === 200 || res.status === 204) {
-        toast.success('Record Deleted Successfully');
-        setIsDeleteModalOpen(false);
-        fetchData(user.id || user._id); 
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Server connection error');
-    }
   };
 
   return (
@@ -168,15 +205,14 @@ export default function UsersPage() {
                 <p className="text-slate-500 text-sm">Managing Sub-Administrators</p>
               </div>
               <div className="flex items-center gap-3">
-                {/* Search Bar */}
                 <div className="relative">
                    <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                    <input 
                     type="text" 
                     placeholder="Search name or school..." 
                     value={searchQuery}
-                    onChange={handleSearchChange}
-                    className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-sm w-64 focus:ring-2 ring-slate-100 transition-all"
+                    onChange={(e) => {setSearchQuery(e.target.value); setCurrentPage(1);}}
+                    className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-sm w-64 focus:ring-2 ring-slate-100 transition-all text-black"
                    />
                 </div>
                 <button onClick={openCreateForm} className="bg-slate-900 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl hover:bg-slate-800 transition-all">
@@ -186,102 +222,70 @@ export default function UsersPage() {
             </header>
 
             {loading ? (
-              <div className="text-center py-20 font-bold text-slate-400">Loading Admin Directory...</div>
+              <div className="text-center py-20 font-bold text-slate-400 uppercase tracking-widest">Loading...</div>
             ) : (
               <div className="space-y-4">
-                {currentAdmins.length > 0 ? (
-                  currentAdmins.map(admin => (
-                    <div key={admin.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                      <div className="p-5 flex justify-between items-center">
-                        <div className="flex gap-4 items-center">
-                          {admin.logo ? (
-                              <img src={admin.logo} alt="logo" className="w-12 h-12 rounded-full object-cover border border-slate-200" />
-                          ) : (
-                              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-400 border uppercase">{admin.name.charAt(0)}</div>
-                          )}
-                          <div>
-                            <h3 className="font-bold text-slate-800">{admin.name}</h3>
-                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-                              {admin.institute} {admin.watermark && `| ${admin.watermark}`}
-                            </p>
-                          </div>
+                {currentAdmins.map(admin => (
+                  <div key={admin.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="p-5 flex justify-between items-center text-black">
+                      <div className="flex gap-4 items-center">
+                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-400 border uppercase overflow-hidden">
+                          {admin.logo ? <img src={admin.logo} className="w-full h-full object-cover" /> : admin.name.charAt(0)}
                         </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => setExpandedAdmin(expandedAdmin === admin.id ? null : admin.id)} className="px-3 py-1.5 bg-slate-100 text-[10px] font-black uppercase rounded-lg flex items-center gap-2">
-                            {teachers.filter(t => String(t.adminId || t.userId) === String(admin.id)).length} Teachers
-                            {expandedAdmin === admin.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                          </button>
-                          <button onClick={() => openEditForm(admin)} className="p-2 text-slate-300 hover:text-blue-600 transition-colors"><Edit size={18} /></button>
-                          <button onClick={() => {setDeletingItem({id: admin.id, type: 'users'}); setIsDeleteModalOpen(true)}} className="p-2 text-slate-300 hover:text-red-500"><Trash2 size={18} /></button>
+                        <div>
+                          <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-slate-800">{admin.name}</h3>
+                              <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase ${admin.planType === 'premier' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                                  {admin.planType || 'Basic'}
+                              </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{admin.institute}</p>
+                          <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">
+                             Expires: {admin.expiryDate ? new Date(admin.expiryDate).toLocaleDateString() : 'N/A'}
+                          </p>
                         </div>
                       </div>
-
-                      {expandedAdmin === admin.id && (
-                        <div className="p-5 bg-slate-50 border-t border-slate-100 grid grid-cols-1 gap-2">
-                          {admin.address && (
-                              <p className="text-[10px] text-slate-500 mb-2 flex items-center gap-1 italic"><HiOutlineLocationMarker/> {admin.address}</p>
-                          )}
-                          {teachers.filter(t => String(t.adminId || t.userId) === String(admin.id)).length > 0 ? (
-                            teachers.filter(t => String(t.adminId || t.userId) === String(admin.id)).map(teacher => (
-                              <div key={teacher.id} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center">
-                                <div className="flex gap-3 items-center">
-                                    <div className="bg-slate-900 p-2 rounded-lg text-white"><GraduationCap size={16}/></div>
-                                    <div>
-                                        <p className="font-bold text-sm">{teacher.name}</p>
-                                        <div className="flex gap-1 mt-1">
-                                            {teacher.subjects?.map((s:any) => <span key={s} className="bg-emerald-50 text-emerald-600 text-[9px] px-1.5 py-0.5 rounded font-bold">{s}</span>)}
-                                            {teacher.classes?.map((c:any) => <span key={c} className="bg-blue-50 text-blue-600 text-[9px] px-1.5 py-0.5 rounded font-bold">{c}</span>)}
-                                        </div>
-                                    </div>
-                                </div>
-                                <button onClick={() => {setDeletingItem({id: teacher.id, type: 'teachers'}); setIsDeleteModalOpen(true)}} className="text-slate-200 hover:text-red-500 transition-colors"><HiOutlineX /></button>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-center text-xs text-slate-400 py-2">No teachers linked to this admin.</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
-                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">No matching admins found</p>
-                  </div>
-                )}
-
-                {/* --- Pagination Controls --- */}
-                {filteredAdmins.length > itemsPerPage && (
-                  <div className="mt-8 flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                      Page {currentPage} of {totalPages}
-                    </p>
-                    <div className="flex gap-2">
-                      <button 
-                        disabled={currentPage === 1}
-                        onClick={() => setCurrentPage(prev => prev - 1)}
-                        className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 transition-all text-slate-600"
-                      >
-                        <HiChevronLeft size={20} />
-                      </button>
-                      {[...Array(totalPages)].map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setCurrentPage(i + 1)}
-                          className={`w-9 h-9 rounded-lg text-xs font-black transition-all ${currentPage === i + 1 ? 'bg-slate-900 text-white shadow-lg' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                        >
-                          {i + 1}
+                      <div className="flex gap-2">
+                        <button onClick={() => setExpandedAdmin(expandedAdmin === admin.id ? null : admin.id)} className="px-3 py-1.5 bg-slate-100 text-[10px] font-black uppercase rounded-lg flex items-center gap-2 text-slate-600 hover:bg-slate-200 transition-all">
+                          {teachers.filter(t => String(t.adminId || t.userId) === String(admin.id)).length} Teachers 
+                          {expandedAdmin === admin.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                         </button>
-                      ))}
-                      <button 
-                        disabled={currentPage === totalPages}
-                        onClick={() => setCurrentPage(prev => prev + 1)}
-                        className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 transition-all text-slate-600"
-                      >
-                        <HiChevronRight size={20} />
-                      </button>
+                        <button onClick={() => openEditForm(admin)} className="p-2 text-slate-300 hover:text-blue-600 transition-colors"><Edit size={18} /></button>
+                        <button onClick={() => {setDeletingItem({id: admin.id, type: 'users'}); setIsDeleteModalOpen(true)}} className="p-2 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                      </div>
                     </div>
+
+                    {expandedAdmin === admin.id && (
+                      <div className="p-5 bg-slate-50 border-t border-slate-100 space-y-2">
+                         {admin.address && (
+                            <p className="text-[10px] text-slate-500 mb-2 flex items-center gap-1 italic uppercase font-bold"><HiOutlineLocationMarker/> {admin.address}</p>
+                          )}
+                        {teachers.filter(t => String(t.adminId || t.userId) === String(admin.id)).length > 0 ? (
+                          teachers.filter(t => String(t.adminId || t.userId) === String(admin.id)).map(teacher => (
+                            <div key={teacher.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm shadow-sm">
+                              <div className="flex gap-3 items-center">
+                                <div className="bg-slate-900 p-2 rounded-lg text-white"><GraduationCap size={16}/></div>
+                                <span className="font-bold text-slate-700">{teacher.name}</span>
+                              </div>
+                              <button onClick={() => {setDeletingItem({id: teacher.id, type: 'teachers'}); setIsDeleteModalOpen(true)}} className="text-slate-300 hover:text-red-500 transition-colors"><HiOutlineX /></button>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-center text-[10px] text-slate-400 py-2 font-bold uppercase tracking-widest">No faculty found.</p>
+                        )}
+                      </div>
+                    )}
                   </div>
+                ))}
+
+                {totalPages > 1 && (
+                   <div className="mt-8 flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Page {currentPage} of {totalPages}</p>
+                      <div className="flex gap-2">
+                        <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 text-slate-600 transition-all"><HiChevronLeft size={20} /></button>
+                        <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 text-slate-600 transition-all"><HiChevronRight size={20} /></button>
+                      </div>
+                   </div>
                 )}
               </div>
             )}
@@ -289,83 +293,107 @@ export default function UsersPage() {
         </div>
       </main>
 
-      {/* MODAL (Form) - SAME AS BEFORE */}
+      {/* MODAL FORM */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-2">
-          <div className="bg-white rounded-xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-            <div className="p-4 flex justify-between items-center bg-slate-900 text-white">
-              <h3 className="text-xl font-black tracking-tight">{editingAdminId ? 'Update Admin Profile' : 'Register New Admin'}</h3>
-              <button onClick={() => setIsFormOpen(false)} className="w-8 h-8 flex justify-center items-center bg-white/10 hover:bg-red-500 rounded-full transition-all"><HiOutlineX /></button>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
+          <div className="bg-white rounded-xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden text-black">
+            <div className="p-4 flex justify-between items-center bg-slate-900 text-white font-bold uppercase tracking-tight">
+              <h3>{editingAdminId ? 'Modify Admin' : 'Register Admin'}</h3>
+              <button onClick={() => setIsFormOpen(false)} className="w-8 h-8 flex justify-center items-center hover:bg-white/10 rounded-full transition-all"><HiOutlineX /></button>
             </div>
-            <form onSubmit={handleFormSubmit} className="p-8 overflow-y-auto space-y-4">
+            
+            <form onSubmit={handleFormSubmit} className="p-8 overflow-y-auto space-y-6">
+              {/* Plan Selection UI (Original Style) */}
+               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-4">Select Subscription Plan</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { id: 'basic', title: 'Basic', duration: '3 Months', access: 'Half Access', icon: <HiOutlineShieldCheck /> },
+                    { id: 'pro', title: 'Pro', duration: '1 Year', access: 'Full Access', icon: <HiOutlineLightningBolt /> },
+                    { id: 'premier', title: 'Premier', duration: '3 Years', access: 'Full Access', icon: <Crown size={18} /> }
+                  ].map((plan) => (
+                    <div 
+                      key={plan.id}
+                      onClick={() => setSelectedPlan(plan.id)}
+                      className={`cursor-pointer p-4 rounded-xl border-2 transition-all flex flex-col gap-1 ${selectedPlan === plan.id ? 'border-slate-900 bg-white shadow-md' : 'border-slate-200 bg-white/50 hover:border-slate-300'}`}
+                    >
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${selectedPlan === plan.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                        {plan.icon}
+                      </div>
+                      <p className="font-black text-sm mt-2">{plan.title}</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase">{plan.duration}</p>
+                      <p className={`text-[9px] font-black px-2 py-0.5 rounded-md mt-1 self-start ${plan.id === 'basic' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
+                        {plan.access}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Input Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="relative">
                   <HiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} type="text" placeholder="Full Name" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700" />
+                  <input required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="User Name (Min 4 chars)" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-sm outline-none focus:border-slate-400 transition-all"/>
                 </div>
                 <div className="relative">
                   <HiOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} type="email" placeholder="Email Address" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700" />
+                  <input required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} type="email" placeholder="Email Address" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-sm outline-none focus:border-slate-400 transition-all"/>
                 </div>
               </div>
 
               <div className="relative">
                 <HiOutlineOfficeBuilding className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input required value={formData.institute} onChange={(e) => setFormData({ ...formData, institute: e.target.value })} type="text" placeholder="Institute / School Name" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700 font-bold" />
+                <input required value={formData.institute} onChange={(e) => setFormData({...formData, institute: e.target.value})} placeholder="Institute / School Name" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-sm font-bold outline-none focus:border-slate-400 transition-all"/>
               </div>
 
               <div className="relative">
                 <HiOutlineLocationMarker className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} type="text" placeholder="Institute Address (Optional)" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700" />
+                <input value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} placeholder="Location Address" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-sm outline-none focus:border-slate-400 transition-all"/>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="relative">
                   <HiOutlinePhone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} type="tel" placeholder="Phone" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700" />
+                  <input value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="Phone (11 Digits)" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-sm outline-none focus:border-slate-400 transition-all"/>
                 </div>
                 <div className="relative">
                   <HiOutlineBadgeCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input value={formData.watermark} onChange={(e) => setFormData({ ...formData, watermark: e.target.value })} type="text" placeholder="Watermark (Optional)" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700" />
+                  <input value={formData.watermark} onChange={(e) => setFormData({...formData, watermark: e.target.value})} placeholder="Watermark Label" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-sm outline-none focus:border-slate-400 transition-all"/>
                 </div>
               </div>
 
-              <div className="relative">
-                <HiOutlinePhotograph className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input value={formData.logo} onChange={(e) => setFormData({ ...formData, logo: e.target.value })} type="url" placeholder="Institute Logo URL (Optional)" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                 <div className="relative">
                   <HiOutlineLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input required value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} type="password" placeholder="Password" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700" />
+                  <input required={!editingAdminId} value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} type="password" placeholder="Password (Min 6 chars)" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-sm outline-none focus:border-slate-400 transition-all"/>
                 </div>
                 <div className="relative">
                   <HiOutlineLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input required value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} type="password" placeholder="Confirm Password" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-md outline-none text-sm text-slate-700" />
+                  <input required={!editingAdminId} value={formData.confirmPassword} onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} type="password" placeholder="Verify Password" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-sm outline-none focus:border-slate-400 transition-all"/>
                 </div>
               </div>
 
-              <button type="submit" className="w-full py-4 bg-slate-900 text-white font-black rounded-xl text-xs uppercase tracking-widest mt-4 hover:bg-slate-800 transition-colors">
-                {editingAdminId ? 'Save Profile Changes' : 'Initialize Admin Account'}
+              <button type="submit" className="w-full py-4 bg-slate-900 text-white font-black rounded-xl text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
+                {editingAdminId ? 'Save Profile' : 'Activate Account'}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* DELETE MODAL - SAME AS BEFORE */}
+      {/* DELETE MODAL (Original Style) */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[300] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-sm text-center shadow-2xl">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-sm text-center shadow-2xl text-black">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
               <AlertTriangle size={32} />
             </div>
-            <h2 className="text-xl font-bold">Are you sure?</h2>
-            <p className="text-slate-500 text-xs mt-2 uppercase font-black tracking-widest">Linked faculty will be permanently wiped.</p>
+            <h2 className="font-bold text-xl">Are you sure?</h2>
+            <p className="text-slate-500 text-[10px] mt-1 font-black uppercase tracking-widest">Data recovery is not possible.</p>
             <div className="grid grid-cols-2 gap-3 mt-8">
-              <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-3 bg-slate-100 rounded-xl font-bold text-[10px] uppercase">Cancel</button>
-              <button onClick={handleDelete} className="px-4 py-3 bg-red-600 text-white rounded-xl font-bold text-[10px] uppercase shadow-lg shadow-red-200">Yes, Delete</button>
+              <button onClick={() => setIsDeleteModalOpen(false)} className="py-3 bg-slate-100 rounded-xl font-bold text-[10px] uppercase hover:bg-slate-200 transition-all">Cancel</button>
+              <button onClick={handleDelete} className="py-3 bg-red-600 text-white rounded-xl font-bold text-[10px] uppercase shadow-lg shadow-red-100 hover:bg-red-700 transition-all">Confirm</button>
             </div>
           </div>
         </div>

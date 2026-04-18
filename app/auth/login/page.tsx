@@ -14,8 +14,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const API_BASE = "/api/auth"; 
-  // const API_BASE = "https://testbackend-production-69cb.up.railway.app/api";
-  // const API_BASE = "https://backendrepoo-production.up.railway.app/api"; 
+
+  // Helper to "hash" (encode) sensitive data for localStorage
+  const maskData = (data: string) => btoa(data);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +29,19 @@ export default function LoginPage() {
 
       const { type, data } = response.data;
       
-      let finalRole = data.role || (type === 'teacher' ? 'teacher' : 'admin');
+      // --- EXPIRY CHECK LOGIC ---
+      if (data.expiryDate) {
+        const expiryDate = new Date(data.expiryDate).getTime();
+        const currentDate = new Date().getTime();
 
+        if (currentDate > expiryDate) {
+          toast.error("Your plan has expired. Please contact support.");
+          setLoading(false);
+          return; 
+        }
+      }
+
+      let finalRole = data.role || (type === 'teacher' ? 'teacher' : 'admin');
       loginSuccess(data, finalRole);
 
     } catch (error: any) {
@@ -49,15 +61,40 @@ export default function LoginPage() {
     };
     
     const token = btoa(JSON.stringify(tokenData));
-    document.cookie = `auth_token=${token}; path=/; max-age=86400`;
-    document.cookie = `user_role=${role}; path=/; max-age=86400`;
 
+    // --- DYNAMIC EXPIRY LOGIC (Plan-Based) ---
+    let cookieMaxAge = 86400; // Default 24 hours
+    if (userData.expiryDate) {
+      const expiry = new Date(userData.expiryDate).getTime();
+      const now = new Date().getTime();
+      const diffInSeconds = Math.floor((expiry - now) / 1000);
+      if (diffInSeconds > 0) {
+        cookieMaxAge = diffInSeconds;
+      }
+    }
+
+    // Set Cookies with Plan Expiry
+    document.cookie = `auth_token=${token}; path=/; max-age=${cookieMaxAge}`;
+    document.cookie = `user_role=${role}; path=/; max-age=${cookieMaxAge}`;
+
+    // --- LOCAL STORAGE WITH MASKED SENSITIVE INFO ---
     localStorage.setItem('user', JSON.stringify({
       ...tokenData,
-      schoolName: userData.institute || "Creative School", 
+      // Sensitive info masked
+      email: maskData(userData.email),
+      phone: userData.phone ? maskData(userData.phone) : "",
+      password: maskData(password), // Storing the login password masked
+      
+      // General Info
+      institute: userData.institute || "Creative School",
+      address: userData.address || "",
       watermark: userData.watermark || "",
       logo: userData.logo || "",
-      address: userData.address || "",
+      profilePic: userData.profilePic || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+      planType: userData.planType || "basic",
+      accessType: userData.accessType || "full",
+      expiryDate: userData.expiryDate || null,
+      isActive: userData.isActive,
       classes: userData.classes || [],
       subjects: userData.subjects || []
     }));
@@ -69,6 +106,7 @@ export default function LoginPage() {
 
   return (
     <div className="h-screen w-screen bg-[#f3f4f6] flex items-center justify-center p-4 font-sans text-black">
+      <Toaster />
       <div className="w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200 flex flex-col md:flex-row">
         
         {/* Left Side: Branding */}

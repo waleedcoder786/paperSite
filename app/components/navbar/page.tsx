@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   FaBars,
@@ -9,12 +9,15 @@ import {
   FaSave,
   FaHistory,
   FaCog,
-  FaShieldAlt,
+  FaUserLock,
   FaUsers,
   FaSignOutAlt,
-  FaEye, FaTrashAlt,
+  FaShieldAlt,
+  FaEye, 
+  FaTrashAlt,
   FaChalkboardTeacher,
   FaTimes, 
+  FaLock
 } from "react-icons/fa";
 import { PlusCircle, Crown, Calendar, Zap, LogOut, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -33,7 +36,7 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Handle Mounting
+  // Handle Mounting - LocalStorage sy data lena
   useEffect(() => {
     setMounted(true);
     const storedUser = localStorage.getItem("user");
@@ -41,11 +44,15 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
       try {
         const user = JSON.parse(storedUser);
         setUserRole(user.role);
+        
+        // Date format clean karna (YYYY-MM-DD)
+        const cleanDate = user.expiryDate ? user.expiryDate.split('T')[0] : "N/A";
+
         setUserData({
           name: user.name || "User",
-          expiryDate: user.expiryDate || "2030-04-04",
-          package: user.package || "Basic",
-          profileImage: user.profileImage || ""
+          expiryDate: cleanDate,
+          package: user.planType || "Basic", // Mapping planType to package
+          profileImage: user.profilePic || "" // Mapping profilePic to profileImage
         });
       } catch (error) {
         console.error("Error parsing user data", error);
@@ -62,27 +69,16 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
     { name: "Users", icon: <FaUsers />, path: "/users" },
     { name: "Settings", icon: <FaCog />, path: "/settings" },
     { name: "AddData", icon: <PlusCircle />, path: "/add-data" }, 
+    { name: "Login History", icon: <FaLock />, path: "/login-history" }, 
     { name: "removeData", icon: <FaTrashAlt/>, path: "/removeData" }, 
     { name: "View Data", icon: <FaEye />, path: "/view-data" }, 
   ];
 
   const menuItems = allMenuItems.filter((item) => {
-    // 1. Agar Role 'teacher' hai
     if (userRole === "teacher") {
       const teacherRestricted = ["Teachers", "Users", "Settings", "AddData"];
       return !teacherRestricted.includes(item.name);
     }
-    if (userRole === "superadmin") {
-      const teacherRestricted = [
-        "Saved Paper",
-        "Teachers",
-        "Settings",
-        "Generate Paper",
-        "Past Papers",
-      ];
-      return !teacherRestricted.includes(item.name);
-    }
-    // 2. Agar Role 'subadmin' hai (Admin table se aane wale users)
     if (userRole === "admin") {
       return (
         item.name !== "Users" &&
@@ -92,11 +88,11 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
         item.name !== "Settings"
       );
     }
-    // 3. Agar Role 'superadmin' hai
     if (userRole === "superadmin") {
-      return true; // Super admin ko sab nazar aayega (including 'Users')
+        // Superadmin logic as per your previous code
+        const saRestricted = ["Saved Paper", "Teachers", "Settings", "Generate Paper", "Login History", "Past Papers"];
+        return !saRestricted.includes(item.name);
     }
-    if (item.name === "Users") return false;
     return true;
   });
 
@@ -104,7 +100,7 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
     router.push(path);
   };
 
-   const handleLogout = () => {
+  const handleLogout = () => {
     document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
     toast.success("Logged out successfully.");
     localStorage.removeItem("user");
@@ -136,7 +132,7 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
       </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 px-3 space-y-2 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 px-3 space-y-2 overflow-y-auto no-scrollbar">
           {menuItems.map((item) => {
             const isActive = pathname === item.path;
             return (
@@ -154,14 +150,7 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
                 >
                   {item.icon}
                 </span>
-                {/* Mobile par hamesha text dikhe agar open ho, desktop par collapse logic chale */}
-                <span className="whitespace-nowrap ml-2">{item.name}</span>
-                {/* Tooltip (Only for desktop when collapsed) */}
-                {isOpen && (
-                  <div className="hidden   md:block absolute left-16 bg-slate-800 text-white text-[10px] px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-2xl whitespace-nowrap z-50 uppercase tracking-widest border border-slate-700">
-                    {item.name}
-                  </div>
-                )}
+                <span className={`whitespace-nowrap ml-2 transition-all duration-300 ${isOpen ? "opacity-100" : "opacity-0 w-0"}`}>{item.name}</span>
               </button>
             );
           })}
