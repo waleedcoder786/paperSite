@@ -133,6 +133,12 @@ function Page() {
     setSelectedSubjects([]);
   };
 
+  const confirmDelete = (teacher: any) => {
+    setTeacherToDelete(teacher);
+    setShowDeleteModal(true);
+    setOpenMenuId(null);
+  };
+
   const handleDelete = async () => {
     if (!teacherToDelete) return;
     const teacherId = teacherToDelete._id || teacherToDelete.id;
@@ -284,13 +290,13 @@ function Page() {
                     Showing <span className="font-bold">{indexOfFirstTeacher + 1}</span> to <span className="font-bold">{Math.min(indexOfLastTeacher, teachers.length)}</span> of <span className="font-bold">{teachers.length}</span>
                   </p>
                   <div className="flex gap-1 sm:gap-2 order-1 sm:order-2">
-                    <button disabled={currentPage === 1} onClick={() => paginate(currentPage - 1)} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30"><HiChevronLeft /></button>
+                    <button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30"><HiChevronLeft /></button>
                     <div className="flex gap-1">
                         {[...Array(totalPages)].map((_, i) => (
-                        <button key={i} onClick={() => paginate(i + 1)} className={`w-8 h-8 rounded-lg text-xs font-bold ${currentPage === i + 1 ? 'bg-blue-600 text-white' : 'border border-slate-200 text-slate-600'}`}>{i + 1}</button>
+                        <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-8 h-8 rounded-lg text-xs font-bold ${currentPage === i + 1 ? 'bg-blue-600 text-white' : 'border border-slate-200 text-slate-600'}`}>{i + 1}</button>
                         ))}
                     </div>
-                    <button disabled={currentPage === totalPages} onClick={() => paginate(currentPage + 1)} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30"><HiChevronRight /></button>
+                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30"><HiChevronRight /></button>
                   </div>
                 </div>
               </div>
