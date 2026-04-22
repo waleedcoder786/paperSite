@@ -1,6 +1,6 @@
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
     await dbConnect();
@@ -12,7 +12,7 @@ export async function GET() {
     }
 }
 
-export async function POST(req) {
+export async function POST( req: NextRequest) {
     try {
         await dbConnect();
         const body = await req.json();
@@ -26,7 +26,7 @@ export async function POST(req) {
         await newUser.save();
         
         return NextResponse.json({ success: true, data: newUser }, { status: 201 });
-    } catch (err) {
+    } catch (err:any) {
         console.error("DB Save Error:", err);
         if (err.code === 11000) return NextResponse.json({ message: "Email already exists" }, { status: 400 });
         return NextResponse.json({ error: err.message }, { status: 500 });
