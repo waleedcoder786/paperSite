@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
     FaBars, FaPrint, FaTrash, FaEdit, FaCheck, 
-    FaCloudUploadAlt 
+    FaCloudUploadAlt, FaTimes, FaSave
 } from "react-icons/fa";
 import axios from 'axios';
 import Navbar from '../components/navbar/page';
@@ -15,13 +15,14 @@ interface PaperPreviewProps {
     className: string;
     subject: any;
     chapters: string[];
-    topics: string[]; // <--- Added topics to props
+    topics: string[];
     onClose: () => void;
 }
 
 export default function PaperPreview({ className, subject, chapters, topics, onClose }: PaperPreviewProps) {
     const paperRef = useRef<HTMLDivElement>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
     const [questionBatches, setQuestionBatches] = useState<any[]>([]);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -41,18 +42,10 @@ export default function PaperPreview({ className, subject, chapters, topics, onC
 
     const toUrduDigits = (num: any) => {
         if (num === undefined || num === null) return '۰';
-        const urduDigits: any = {
-            '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
-            '5': '5', '6': '6', '7': '7', '8': '8', '9': '9'
-        };
-        return num.toString().split('').map((d: string) => urduDigits[d] || d).join('');
+        return num.toString().replace(/\d/g, (d: string) => "۰۱۲۳۴۵۶۷۸۹"[parseInt(d)]);
     };
 
-    const isUrdu = (text: string) => {
-        const urduPattern = /[\u0600-\u06FF]/;
-        return urduPattern.test(text || "");
-    };
-
+    const isUrdu = (text: string) => /[\u0600-\u06FF]/.test(text || "");
     const paperIsUrdu = isUrdu(subject?.name || "") || questionBatches.some(b => isUrdu(b.customTitle));
 
     useEffect(() => {
@@ -62,8 +55,6 @@ export default function PaperPreview({ className, subject, chapters, topics, onC
 
     const handleAddQuestions = (newQs: any[], config: any) => {
         if (newQs.length === 0) return;
-
-        // Check if incoming questions are Urdu
         const newQsAreUrdu = newQs.some(q => isUrdu(q.question || q.text)) || isUrdu(subject?.name || "");
         
         const isMcq = config.type.toLowerCase() === 'mcqs' || config.typeName === 'mcqs';
@@ -71,125 +62,62 @@ export default function PaperPreview({ className, subject, chapters, topics, onC
         const isLong = config.type.toLowerCase().includes('longs');
 
         let autoTitle = "";
-
-
-        // Generate headings based on language and question type
         if (newQsAreUrdu) {
-            if (isMcq) {
-                autoTitle = "درست آپشن کا انتخاب کریں۔";
-            } else if (isShort) {
-                autoTitle = `کوئی سے ${toUrduDigits(config.attempt)} مختصر سوالات حل کریں۔`;
-            } else if (isLong) {
-                autoTitle = `کوئی سے ${toUrduDigits(config.attempt)} تفصیلی سوالات حل کریں۔`;
-            } else {
-                autoTitle = `کوئی سے ${toUrduDigits(config.attempt)} سوالات حل کریں۔`;
-            }
+            if (isMcq) autoTitle = "درست آپشن کا انتخاب کریں۔";
+            else if (isShort) autoTitle = `کوئی سے ${toUrduDigits(config.attempt)} مختصر سوالات حل کریں۔`;
+            else if (isLong) autoTitle = `کوئی سے ${toUrduDigits(config.attempt)} تفصیلی سوالات حل کریں۔`;
+            else autoTitle = `سوالات حل کریں۔`;
         } else {
-            if (isMcq) {
-                autoTitle = "Choose the correct option.";
-            } else if (isShort) {
-                autoTitle = `Attempt any ${config.attempt} short questions.`;
-            } else if (isLong) {
-                autoTitle = `Attempt any ${config.attempt} long questions.`;
-            } else {
-                autoTitle = `Attempt any ${config.attempt} questions.`;
-            }
+            if (isMcq) autoTitle = "Choose the correct option.";
+            else if (isShort) autoTitle = `Attempt any ${config.attempt} short questions.`;
+            else if (isLong) autoTitle = `Attempt any ${config.attempt} long questions.`;
+            else autoTitle = `Attempt questions.`;
         }
 
         const newBatch = {
             id: editingBatch ? editingBatch.id : Date.now(),
             type: config.type.toLowerCase(),
             customTitle: editingBatch?.customTitle || autoTitle,
-            questions: newQs.map(q => ({
-                ...q,
-                tempId: q.tempId || `${Date.now()}-${Math.random()}`
-            })),
-            config: {
-                total: config.total,
-                attempt: config.attempt,
-                marks: config.marks,
-                typeName: config.type,
-                layoutCols: config.layoutCols || 1
-            }
+            questions: newQs.map(q => ({ ...q, tempId: q.tempId || `${Date.now()}-${Math.random()}` })),
+            config: { ...config, layoutCols: config.layoutCols || 1 }
         };
 
-        if (editingBatch) {
-            setQuestionBatches(prev => prev.map(b => b.id === editingBatch.id ? newBatch : b));
-        } else {
-            setQuestionBatches(prev => [...prev, newBatch]);
-        }
+        if (editingBatch) setQuestionBatches(prev => prev.map(b => b.id === editingBatch.id ? newBatch : b));
+        else setQuestionBatches(prev => [...prev, newBatch]);
 
         setIsMenuOpen(false);
         setEditingBatch(null);
-        toast.success("Section Added Successfully");
+        toast.success("Section Updated");
     };
 
-    const handleSectionTitleChange = (batchId: number, newTitle: string) => {
-        setQuestionBatches(prev => prev.map(b => b.id === batchId ? { ...b, customTitle: newTitle } : b));
-    };
-
-    const handleQuestionTextChange = (batchId: number, qTempId: string, newText: string) => {
-        setQuestionBatches(prev => prev.map(batch => {
-            if (batch.id === batchId) {
-                return {
-                    ...batch,
-                    questions: batch.questions.map((q: any) => 
-                        q.tempId === qTempId ? { ...q, question: newText, text: newText } : q
-                    )
-                };
-            }
-            return batch;
-        }));
-    };
-
-    const removeBatch = (batchId: number) => {
-        setQuestionBatches(prev => prev.filter(b => b.id !== batchId));
-    };
-
-    const removeQuestionFromBatch = (batchId: number, qTempId: string) => {
-        setQuestionBatches(prev => prev.map(batch => {
-            if (batch.id === batchId) {
-                return {
-                    ...batch,
-                    questions: batch.questions.filter((q: any) => q.tempId !== qTempId)
-                };
-            }
-            return batch;
-        }).filter(batch => batch.questions.length > 0));
-    };
-
-    const grandTotalMarks = questionBatches.reduce((sum, batch) => 
-        sum + (Number(batch.config.attempt) * Number(batch.config.marks)), 0
-    );
+    const grandTotalMarks = questionBatches.reduce((sum, b) => sum + (Number(b.config.attempt) * Number(b.config.marks)), 0);
 
     const handleSavePaper = async () => {
-        if (!paperName.trim()) return toast.error("Please enter a paper name.");
+        if (!paperName.trim()) return toast.error("Enter paper name");
         setIsLoading(true);
         try {
-            const payload = {
+            await axios.post(BACKEND_URL, {
                 userId: user?.id || user?._id, 
                 paperName, paperType, paperDate, paperTime,
                 className, subject: subject?.name,
                 totalMarks: grandTotalMarks,
                 batches: questionBatches,
-                headerInfo: {
-                    schoolName: user?.schoolName || "My School",
-                    address: user?.address || "",
-                }
-            };
-            await axios.post(BACKEND_URL, payload);
-            toast.success("Paper saved successfully!");
+                headerInfo: { schoolName: user?.schoolName, address: user?.address }
+            });
+            toast.success("Saved!");
             setIsSaveModalOpen(false);
-        } catch (error: any) {
-            toast.error("Failed to save paper.");
-        } finally {
-            setIsLoading(false);
-        }
+        } catch (e) { toast.error("Error saving"); } finally { setIsLoading(false); }
     };
 
     return (
         <div className="flex h-screen w-screen bg-slate-200 overflow-hidden font-sans text-black">
-            <Navbar />
+            {/* Sidebar with Mobile Support */}
+            <div className={`fixed inset-y-0 left-0 z-[110] transition-transform duration-300 md:relative md:translate-x-0 ${isMobileNavOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <Navbar />
+                <button onClick={() => setIsMobileNavOpen(false)} className="absolute top-4 right-[-40px] bg-white p-2 rounded-r-md shadow-md md:hidden">
+                    <FaTimes />
+                </button>
+            </div>
 
             <QuestionMenuModal
                 isOpen={isMenuOpen}
@@ -204,166 +132,153 @@ export default function PaperPreview({ className, subject, chapters, topics, onC
 
             {/* Save Modal */}
             {isSaveModalOpen && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-                        <div className="bg-slate-50 p-5 border-b flex items-center gap-3">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                        <div className="p-5 border-b flex items-center gap-3">
                             <FaCloudUploadAlt className="text-blue-600" />
-                            <h2 className="text-lg font-bold text-slate-800">SAVE PAPER</h2>
+                            <h2 className="text-lg font-bold">SAVE PAPER</h2>
                         </div>
                         <div className="p-6 space-y-4">
-                            <input type="text" placeholder="Paper Name" value={paperName} onChange={(e) => setPaperName(e.target.value)} className="w-full border rounded-lg px-4 py-2 text-black" />
-                            <input type="text" placeholder="Paper Type" value={paperType} onChange={(e) => setPaperType(e.target.value)} className="w-full border rounded-lg px-4 py-2 text-black" />
+                            <input type="text" placeholder="Paper Name" value={paperName} onChange={(e) => setPaperName(e.target.value)} className="w-full border rounded-lg px-4 py-2" />
                             <div className="grid grid-cols-2 gap-4">
-                                <input type="date" value={paperDate} onChange={(e) => setPaperDate(e.target.value)} className="w-full border rounded-lg px-4 py-2 text-black" />
-                                <input type="text" placeholder="Time" value={paperTime} onChange={(e) => setPaperTime(e.target.value)} className="w-full border rounded-lg px-4 py-2 text-black" />
+                                <input type="date" value={paperDate} onChange={(e) => setPaperDate(e.target.value)} className="w-full border rounded-lg px-4 py-2" />
+                                <input type="text" placeholder="Time" value={paperTime} onChange={(e) => setPaperTime(e.target.value)} className="w-full border rounded-lg px-4 py-2" />
                             </div>
                         </div>
-                        <div className="bg-slate-50 px-6 py-4 flex gap-3 justify-end">
-                            <button onClick={() => setIsSaveModalOpen(false)} className="text-slate-500 font-bold text-xs">CANCEL</button>
-                            <button onClick={handleSavePaper} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold text-xs uppercase">
-                                {isLoading ? "Saving..." : "Confirm Save"}
+                        <div className="p-4 flex gap-3 justify-end bg-slate-50 rounded-b-xl">
+                            <button onClick={() => setIsSaveModalOpen(false)} className="px-4 py-2 text-slate-500 font-bold">CANCEL</button>
+                            <button onClick={handleSavePaper} className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
+                                {isLoading ? "..." : "SAVE"}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* TOOLBAR */}
-                <div className="bg-[#0f172a] text-white h-16 flex items-center justify-between px-6 z-50 shrink-0 print:hidden">
+            <div className="flex-1 flex flex-col overflow-hidden relative">
+                {/* TOOLBAR: Responsive buttons */}
+                <div className="bg-[#0f172a] text-white min-h-[64px] flex items-center justify-between px-4 md:px-6 z-50 shrink-0 print:hidden overflow-x-auto gap-4">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <button onClick={() => setIsMobileNavOpen(true)} className="md:hidden p-2 text-xl"><FaBars /></button>
+                        <button onClick={() => { setEditingBatch(null); setIsMenuOpen(true); }} className="bg-blue-600 hover:bg-blue-700 p-2 md:px-4 md:py-2 rounded-lg font-bold text-[11px] flex items-center gap-2 shrink-0">
+                            <FaBars className="hidden sm:block"/> <span className="sm:inline">ADD</span>
+                        </button>
+                        <button onClick={() => setIsEditMode(!isEditMode)} className={`${isEditMode ? 'bg-green-600' : 'bg-amber-600'} p-2 md:px-4 md:py-2 rounded-lg font-bold text-[11px] flex items-center gap-2 shrink-0`}>
+                            {isEditMode ? <><FaCheck /> DONE</> : <><FaEdit /> EDIT</>}
+                        </button>
+                        <button onClick={() => window.print()} className="bg-slate-800 p-2 md:px-4 md:py-2 rounded-lg font-bold text-[11px] text-yellow-400 border border-slate-700 shrink-0">
+                            <FaPrint /> <span className="hidden sm:inline">PRINT</span>
+                        </button>
+                        <button onClick={() => setIsSaveModalOpen(true)} className="bg-slate-800 p-2 md:px-4 md:py-2 rounded-lg font-bold text-[11px] text-green-400 border border-slate-700 shrink-0">
+                            <FaSave /> <span className="hidden sm:inline">SAVE</span>
+                        </button>
+                    </div>
+                    
                     <div className="flex items-center gap-3">
-                        <button onClick={() => { setEditingBatch(null); setIsMenuOpen(true); }} className="bg-blue-600 px-5 py-2.5 rounded-lg font-bold text-[12px] flex items-center gap-2">
-                            <FaBars /> ADD QUESTIONS
-                        </button>
-                        <button onClick={() => setIsEditMode(!isEditMode)} className={`${isEditMode ? 'bg-green-600' : 'bg-amber-600'} px-5 py-2.5 rounded-lg font-bold text-[12px] flex items-center gap-2`}>
-                            {isEditMode ? <><FaCheck /> DONE</> : <><FaEdit /> EDIT MODE</>}
-                        </button>
-                        <button onClick={() => window.print()} className="bg-slate-800 px-5 py-2.5 rounded-lg font-bold text-[12px] flex items-center gap-2 border border-slate-700 text-yellow-400">
-                            <FaPrint /> PRINT
-                        </button>
-                        <button onClick={() => setIsSaveModalOpen(true)} className="bg-slate-800 px-5 py-2.5 rounded-lg font-bold text-[12px] border border-slate-700 text-green-400">
-                            SAVE PAPER
+                        <div className="hidden lg:block bg-slate-900 border border-white/10 rounded-full px-4 py-1.5 font-bold text-slate-400 text-[11px]">
+                            TOTAL: {paperIsUrdu ? toUrduDigits(grandTotalMarks) : grandTotalMarks}
+                        </div>
+                        <button onClick={onClose} className="text-red-400 border border-red-500/50 px-3 py-1.5 md:px-5 md:py-2 rounded-lg text-[11px] font-bold shrink-0">
+                            EXIT
                         </button>
                     </div>
-                    <div className="bg-slate-900 border border-white/10 rounded-full px-4 py-1.5 font-bold text-slate-400 text-[12px]">
-                        TOTAL MARKS: {paperIsUrdu ? toUrduDigits(grandTotalMarks) : grandTotalMarks}
-                    </div>
-                    <button onClick={onClose} className="text-red-400 border border-red-500/50 px-5 py-2.5 rounded-lg text-[12px] font-bold hover:bg-red-500/10 transition-all">
-                        EXIT
-                    </button>
                 </div>
 
-                {/* PAPER AREA */}
-                <div className="flex-1 overflow-y-auto p-10 bg-slate-300 print:p-0 print:bg-white custom-scrollbar">
-                    <div 
-                        ref={paperRef} 
-                        id="printablePaper" 
-                        className={`bg-white mx-auto w-[850px] min-h-[1100px] shadow-2xl relative p-16 print:shadow-none print:w-full print:p-12 text-black transition-all ${isEditMode ? 'ring-4 ring-amber-400' : ''}`}
-                        dir={paperIsUrdu ? 'rtl' : 'ltr'}
-                    >
-                        {/* Header */}
-                        <div className="border-b-4 border-black pb-4 text-center mb-10">
-                            <h1 className="text-3xl font-black uppercase tracking-tighter" contentEditable={isEditMode} suppressContentEditableWarning>{user?.schoolName || "MY SCHOOL NAME"}</h1>
-                            <p className="text-center text-[14px]" contentEditable={isEditMode} suppressContentEditableWarning>{user?.address || "Address, Location Name"}</p>
-                            <h2 className="text-lg font-bold uppercase mt-1 border-y-2 border-black inline-block px-6">{paperType}</h2>
-                            
-                            <div className="flex justify-between mt-6 text-[16px] font-bold">
-                                <div className={paperIsUrdu ? 'text-right' : 'text-left'}>
-                                    <p>{className}</p>
-                                    <p className="text-[13px] font-normal uppercase">Date: {paperIsUrdu ? toUrduDigits(paperDate) : paperDate}</p>
-                                </div>
-                                <span className="text-xl underline decoration-double underline-offset-4">
-                                    Subject: {subject?.name}
-                                </span>
-                                <div className={paperIsUrdu ? 'text-left' : 'text-right'}>
-                                    <p> Marks :{paperIsUrdu ? toUrduDigits(grandTotalMarks) : grandTotalMarks}</p>
-                                    <p className="text-[13px] font-normal uppercase">Time: {paperIsUrdu ? toUrduDigits(paperTime) : paperTime}</p>
+                {/* PAPER AREA: Handles A4 scaling on mobile */}
+                <div className="flex-1 overflow-auto p-4 md:p-10 bg-slate-300 print:p-0 print:bg-white custom-scrollbar">
+                    <div className="w-full flex justify-center">
+                        <div 
+                            ref={paperRef} 
+                            id="printablePaper" 
+                            className={`bg-white shadow-2xl relative p-6 md:p-16 print:shadow-none print:w-full print:p-12 text-black transition-all origin-top
+                                w-full max-w-[850px] min-h-[1100px]
+                                ${isEditMode ? 'ring-4 ring-amber-400' : ''}`}
+                            dir={paperIsUrdu ? 'rtl' : 'ltr'}
+                        >
+                            {/* Header: Responsive flex */}
+                            <div className="border-b-4 border-black pb-4 text-center mb-6 md:mb-10">
+                                <h1 className="text-xl md:text-3xl font-black uppercase" contentEditable={isEditMode} suppressContentEditableWarning>
+                                    {user?.schoolName || "SCHOOL NAME"}
+                                </h1>
+                                <p className="text-[12px] md:text-[14px]" contentEditable={isEditMode} suppressContentEditableWarning>
+                                    {user?.address || "Address, Location"}
+                                </p>
+                                <h2 className="text-sm md:text-lg font-bold uppercase mt-2 border-y-2 border-black inline-block px-4 md:px-6">
+                                    {paperType}
+                                </h2>
+                                
+                                <div className="flex flex-col sm:flex-row justify-between mt-6 text-sm md:text-[16px] font-bold gap-2">
+                                    <div className="text-center sm:text-inherit">
+                                        <p>{className}</p>
+                                        <p className="text-[11px] font-normal">Date: {paperIsUrdu ? toUrduDigits(paperDate) : paperDate}</p>
+                                    </div>
+                                    <span className="text-lg underline decoration-double order-first sm:order-none">
+                                        Subject: {subject?.name}
+                                    </span>
+                                    <div className="text-center sm:text-inherit">
+                                        <p>Marks: {paperIsUrdu ? toUrduDigits(grandTotalMarks) : grandTotalMarks}</p>
+                                        <p className="text-[11px] font-normal">Time: {paperIsUrdu ? toUrduDigits(paperTime) : paperTime}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Sections Rendering */}
-                        <div className="space-y-12">
-                            {questionBatches.map((batch, bIdx) => {
-                                const isTwoCol = batch.config.layoutCols === 2;
-                                const isBatchUrdu = isUrdu(batch.customTitle) || paperIsUrdu;
+                            {/* Sections */}
+                            <div className="space-y-8 md:space-y-12">
+                                {questionBatches.map((batch, bIdx) => {
+                                    const isTwoCol = batch.config.layoutCols === 2;
+                                    const isBatchUrdu = isUrdu(batch.customTitle) || paperIsUrdu;
 
-                                return (
-                                    <div key={batch.id} className="group relative">
-                                        {!isEditMode && (
-                                            <div className={`absolute ${isBatchUrdu ? '-left-12' : '-right-12'} top-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all print:hidden`}>
-                                                <button onClick={() => { setEditingBatch(batch); setIsMenuOpen(true); }} className="text-blue-500 hover:scale-110"><FaEdit size={16}/></button>
-                                                <button onClick={() => removeBatch(batch.id)} className="text-red-500 hover:scale-110"><FaTrash size={14}/></button>
+                                    return (
+                                        <div key={batch.id} className="group relative">
+                                            {!isEditMode && (
+                                                <div className={`absolute ${isBatchUrdu ? '-left-8' : '-right-8'} top-0 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all print:hidden`}>
+                                                    <button onClick={() => { setEditingBatch(batch); setIsMenuOpen(true); }} className="text-blue-500"><FaEdit size={14}/></button>
+                                                    <button onClick={() => setQuestionBatches(prev => prev.filter(b => b.id !== batch.id))} className="text-red-500"><FaTrash size={12}/></button>
+                                                </div>
+                                            )}
+
+                                            <div className="flex justify-between border-b-2 border-black mb-4 font-black italic items-center">
+                                                <span className="uppercase text-sm md:text-lg">
+                                                    {isBatchUrdu ? `سوال نمبر ${toUrduDigits(bIdx + 1)}` : `Q.${bIdx + 1}`}: {batch.customTitle}
+                                                </span>
+                                                <span className="text-[12px] md:text-[15px]">
+                                                    ({isBatchUrdu ? `${toUrduDigits(batch.config.marks)}x${toUrduDigits(batch.config.attempt)}` : `${batch.config.attempt}x${batch.config.marks}`})
+                                                </span>
                                             </div>
-                                        )}
 
-                                        {/* Section Head */}
-                                        <div className="flex justify-between border-b-2 border-black mb-4 font-black italic items-center">
-                                            <span 
-                                                contentEditable={isEditMode} 
-                                                suppressContentEditableWarning 
-                                                className="uppercase outline-none text-lg"
-                                                onBlur={(e) => handleSectionTitleChange(batch.id, e.currentTarget.innerText)}
-                                            >
-                                                {isBatchUrdu ? `سوال نمبر ${toUrduDigits(bIdx + 1)}` : `Q.${bIdx + 1}`}: {batch.customTitle}
-                                            </span>
-                                            <span className="text-[15px]">
-                                                ({isBatchUrdu ? `  ${toUrduDigits(batch.config.marks) +"x" } ${toUrduDigits(batch.config.attempt)}  = ${toUrduDigits(batch.config.attempt * batch.config.marks)}` 
-                                                : `${batch.config.attempt} x ${batch.config.marks} = ${batch.config.attempt * batch.config.marks}`})
-                                            </span>
-                                        </div>
-
-                                        {/* Questions Grid */}
-                                        <div className={`grid ${isTwoCol ? 'grid-cols-2 gap-x-12 gap-y-6' : 'grid-cols-1 space-y-6'}`}>
-                                            {batch.questions.map((q: any, qIdx: number) => {
-                                                const questionText = q.question || q.text;
-                                                const isQUrdu = isUrdu(questionText) || isBatchUrdu;
-                                                
-                                                return (
-                                                    <div key={q.tempId} className="relative group/item">
-                                                        {!isEditMode && (
-                                                            <button onClick={() => removeQuestionFromBatch(batch.id, q.tempId)} className={`absolute ${isQUrdu ? '-left-8' : '-right-8'} top-1 text-red-500 opacity-0 group-hover/item:opacity-100 transition-all print:hidden`}>
-                                                                <FaTrash size={10} />
-                                                            </button>
-                                                        )}
-                                                        
-                                                        {/* Question Text */}
-                                                        <div className="flex gap-3 text-[16px] items-start">
-                                                            <span className="font-bold min-w-[35px] text-center">
-                                                                ({isQUrdu ? toUrduDigits(qIdx + 1) : qIdx + 1})
-                                                            </span>
-                                                            <span 
-                                                                className="font-bold flex-1 outline-none leading-relaxed" 
-                                                                contentEditable={isEditMode} 
-                                                                suppressContentEditableWarning
-                                                                onBlur={(e) => handleQuestionTextChange(batch.id, q.tempId, e.currentTarget.innerText)}
-                                                            >
-                                                                {questionText}
-                                                            </span>
-                                                        </div>
-
-                                                        {/* MCQ Options */}
-                                                        {batch.type === 'mcqs' && q.options && (
-                                                            <div className={`grid grid-cols-2 lg:grid-cols-4 gap-2 mt-3 text-[14px] ${isQUrdu ? 'mr-10' : 'ml-10'}`}>
-                                                                {Object.entries(q.options).map(([key, val]: any) => (
-                                                                    <div key={key} className="flex gap-2 items-start">
-                                                                        <span className="font-bold">
-                                                                            ({isQUrdu ? (urduOptionLabels[key] || key) : key})
-                                                                        </span>
-                                                                        <span contentEditable={isEditMode} suppressContentEditableWarning className="outline-none flex-1">
-                                                                            {val}
-                                                                        </span>
-                                                                    </div>
-                                                                ))}
+                                            {/* Questions Grid: Stacks on mobile */}
+                                            <div className={`grid gap-4 md:gap-6 ${isTwoCol ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                                                {batch.questions.map((q: any, qIdx: number) => {
+                                                    const isQUrdu = isUrdu(q.question || q.text) || isBatchUrdu;
+                                                    return (
+                                                        <div key={q.tempId} className="relative group/item">
+                                                            <div className="flex gap-2 md:gap-3 text-sm md:text-[16px] items-start">
+                                                                <span className="font-bold min-w-[25px] md:min-w-[35px]">
+                                                                    ({isQUrdu ? toUrduDigits(qIdx + 1) : qIdx + 1})
+                                                                </span>
+                                                                <span className="font-bold flex-1 leading-relaxed">
+                                                                    {q.question || q.text}
+                                                                </span>
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
+
+                                                            {batch.type === 'mcqs' && q.options && (
+                                                                <div className={`grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2 mt-2 text-[13px] md:text-[14px] ${isQUrdu ? 'mr-6 md:mr-10' : 'ml-6 md:ml-10'}`}>
+                                                                    {Object.entries(q.options).map(([key, val]: any) => (
+                                                                        <div key={key} className="flex gap-2">
+                                                                            <span className="font-bold">({isQUrdu ? (urduOptionLabels[key] || key) : key})</span>
+                                                                            <span className="flex-1">{val}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -372,16 +287,16 @@ export default function PaperPreview({ className, subject, chapters, topics, onC
             <style jsx global>{`
                 @media print {
                     @page { size: A4; margin: 0; }
-                    body { visibility: hidden; background: white; }
+                    body { visibility: hidden; }
                     #printablePaper, #printablePaper * { visibility: visible; }
                     #printablePaper {
                         position: absolute; left: 0; top: 0;
-                        width: 100% !important; margin: 0 !important;
-                        padding: 15mm !important; box-shadow: none !important;
+                        width: 100% !important; height: auto !important;
+                        padding: 15mm !important;
                     }
                     .print\\:hidden { display: none !important; }
                 }
-                .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+                .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
             `}</style>
         </div>

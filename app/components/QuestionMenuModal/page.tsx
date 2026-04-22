@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   FaTimes, FaSearch, FaCheckSquare, FaArrowLeft, 
-  FaSpinner, FaDatabase, FaRandom, FaListUl, FaLayerGroup, FaColumns, FaTag 
+  FaSpinner, FaDatabase, FaRandom, FaListUl, FaLayerGroup, FaColumns 
 } from "react-icons/fa";
 import toast from 'react-hot-toast';
 
@@ -42,8 +42,6 @@ export default function QuestionMenuModal({
   const [isLoading, setIsLoading] = useState(false);
   const [filterOnlySelected, setFilterOnlySelected] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(false);
-
-  
 
   const API_BASE = "/api";
 
@@ -98,75 +96,45 @@ export default function QuestionMenuModal({
     try {
       const response = await axios.get(`${API_BASE}/classes`);
       let rootData = response.data;
-      
-      // Handling MongoDB Wrapper Structure
-      if (Array.isArray(rootData)) {
-          rootData = rootData[0]?.data || rootData[0];
-      }
+      if (Array.isArray(rootData)) rootData = rootData[0]?.data || rootData[0];
 
-      // Step 1: Find Board from local storage or default to Punjab
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const boardKey = Object.keys(rootData).find(key => 
         key.toLowerCase() === (user.board || 'punjab').toLowerCase()
-      ) || Object.keys(rootData)[0]; // Fallback to first board if not found
+      ) || Object.keys(rootData)[0];
 
       const boardData = rootData[boardKey];
-      if (!boardData || !boardData.classes) {
-        toast.error("Board data structure is invalid.");
-        return;
-      }
-
-      // Step 2: Find Class (Flexible match for "9th" vs "9")
       const classData = boardData.classes.find((c: any) => 
         String(c.title).toLowerCase().trim() === className.toLowerCase().trim() ||
         String(c.id) === className.replace(/\D/g, '')
       );
 
-      if (!classData) {
-        toast.error(`Class ${className} not found in ${boardKey}.`);
-        return;
-      }
+      if (!classData) { toast.error(`Class ${className} not found.`); return; }
 
-      // Step 3: Find Subject
       const targetSubject = classData.subjects?.find((sub: any) => 
           sub.name.toLowerCase().trim() === subjectName.toLowerCase().trim()
       );
       
-      if (!targetSubject?.chapters) {
-        toast.error("Subject or chapters not found.");
-        return;
-      }
+      if (!targetSubject?.chapters) { toast.error("Subject or chapters not found."); return; }
 
       let allQuestions: any[] = [];
-      
-      // Step 4: Filter Selected Chapters
-      const filteredChapters = targetSubject.chapters.filter((ch: any) => 
-        chapters.includes(ch.name || ch)
-      );
+      const filteredChapters = targetSubject.chapters.filter((ch: any) => chapters.includes(ch.name || ch));
 
       filteredChapters.forEach((chapter: any) => {
         if (chapter.topics && Array.isArray(chapter.topics)) {
-          // If topics are selected, only process those. Else process all topics in selected chapter.
           const topicsToProcess = (topics && topics.length > 0) 
             ? chapter.topics.filter((t: any) => topics.includes(t.name || t))
             : chapter.topics;
 
           topicsToProcess.forEach((topic: any) => {
-            // Find key starting with 'MCQ', 'Sho', 'Lon'
             const typeKey = Object.keys(topic.questionTypes || {}).find(k => 
               k.toLowerCase().startsWith(selectedType.toLowerCase().substring(0, 3))
             );
-
             if (typeKey && topic.questionTypes[typeKey]) {
               const typeData = topic.questionTypes[typeKey];
               if (typeData.categories && Array.isArray(typeData.categories)) {
-                // Category Filter (Exercise, etc)
-                const matchedCats = typeData.categories.filter((cat: any) => 
-                  selectedSource.includes(cat.name.trim())
-                );
-                matchedCats.forEach((c: any) => {
-                  if (c.questions) allQuestions = [...allQuestions, ...c.questions];
-                });
+                const matchedCats = typeData.categories.filter((cat: any) => selectedSource.includes(cat.name.trim()));
+                matchedCats.forEach((c: any) => { if (c.questions) allQuestions = [...allQuestions, ...c.questions]; });
               }
             }
           });
@@ -182,13 +150,11 @@ export default function QuestionMenuModal({
           marks: defaultMarks, 
           tempId: `${selectedType}-${i}-${Math.random().toString(36).substr(2, 5)}`
         }));
-        
         setDisplayQuestions(questionsWithTags);
         setViewMode('selection');
         setFilterOnlySelected(false);
       }
     } catch (error) {
-      console.error(error);
       toast.error("Failed to connect to the database.");
     } finally {
       setIsLoading(false);
@@ -198,8 +164,7 @@ export default function QuestionMenuModal({
   const handleRandomSelect = () => {
     setFilterOnlySelected(false);
     const shuffled = shuffle(displayQuestions);
-    const limit = Number(requiredCount);
-    setTempSelected(shuffled.slice(0, limit));
+    setTempSelected(shuffled.slice(0, Number(requiredCount)));
   };
 
   const toggleSelection = (q: any) => {
@@ -216,173 +181,174 @@ export default function QuestionMenuModal({
     : displayQuestions;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 font-sans text-black">
-      <div className="bg-[#fcfdfe] w-full max-w-6xl rounded-sm shadow-2xl overflow-hidden border border-white/20">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-slate-900/80 backdrop-blur-md p-0 sm:p-4 font-sans text-black">
+      <div className="bg-[#fcfdfe] w-full max-w-6xl h-[95vh] sm:h-auto rounded-t-2xl sm:rounded-sm shadow-2xl overflow-hidden border border-white/20 flex flex-col">
         
-        <div className="bg-slate-900 text-white px-8 py-2 flex justify-between items-center border-b-4 border-blue-600">
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-blue-600 rounded-sm shadow-lg shadow-blue-500/30">
-              <FaDatabase size={20} />
+        {/* Header */}
+        <div className="bg-slate-900 text-white px-4 sm:px-8 py-3 flex justify-between items-center border-b-4 border-blue-600 shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2 bg-blue-600 rounded-sm hidden sm:block">
+              <FaDatabase size={18} />
             </div>
             <div>
-              <h2 className="text-xl font-black uppercase tracking-tight">
+              <h2 className="text-sm sm:text-xl font-black uppercase tracking-tight truncate max-w-[200px] sm:max-w-none">
                 {editData ? `Editing Batch` : subjectName}
               </h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                Class {className} • {chapters.length} Chapters • {topics.length > 0 ? `${topics.length} Selected Topics` : 'All Topics'}
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Class {className} • {chapters.length} Ch • {topics.length > 0 ? 'Topic Mode' : 'Full Ch'}
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="hover:bg-red-500 p-2 rounded-full transition-all bg-slate-800"><FaTimes size={20} /></button>
+          <button onClick={onClose} className="hover:bg-red-500 p-2 rounded-full transition-all bg-slate-800"><FaTimes size={18} /></button>
         </div>
 
-        {viewMode === 'filters' ? (
-           <div className="p-10 space-y-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Category</label>
-                <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} 
-                        className="bg-white border-2 border-slate-100 rounded-xl p-4 font-bold outline-none focus:border-blue-600 text-slate-700 shadow-sm">
-                  <option value="MCQs">MCQs (Objectives)</option>
-                  <option value="shorts">Short Questions</option>
-                  <option value="longs">Long Questions</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-2 lg:col-span-2">
-                <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Source Material</label>
-                <div className="flex flex-wrap gap-2">
-                  {["Exercise Questions", "Additional Questions", "Pastpapers Questions"].map((src) => (
-                    <button
-                      key={src}
-                      onClick={() => toggleSource(src)}
-                      className={`px-4 py-3 rounded-xl text-[11px] font-black uppercase border-2 transition-all shadow-sm ${
-                        selectedSource.includes(src) 
-                        ? 'bg-blue-600 border-blue-600 text-white' 
-                        : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200'
-                      }`}
-                    >
-                      {src === "Pastpapers Questions" ? "Past Papers" : src}
-                    </button>
-                  ))}
-                  <button onClick={() => toggleSource('All')} className="px-4 py-3 rounded-xl text-[11px] font-black uppercase border-2 border-dashed border-slate-300 text-slate-400 hover:border-blue-600 hover:text-blue-600 transition-all">
-                    Select All
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Total Qs</label>
-                <input type="number" value={requiredCount} onChange={(e) => setRequiredCount(Number(e.target.value))} 
-                       className="bg-white border-2 border-slate-100 rounded-xl p-4 font-bold outline-none focus:border-blue-600 text-slate-700 shadow-sm" />
-              </div>
-
-              {!selectedType.toLowerCase().includes('mcq') && (
-                <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
-                  <label className="text-[11px] font-black text-blue-600 uppercase ml-1">To Attempt</label>
-                  <input type="number" value={attemptCount} onChange={(e) => setAttemptCount(Number(e.target.value))} 
-                          className="bg-blue-50 border-2 border-blue-100 rounded-xl p-4 font-bold outline-none focus:border-blue-600 text-blue-700 shadow-sm" />
-                </div>
-              )}
-              <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Marks/Q</label>
-                <input type="number" value={defaultMarks} onChange={(e) => setDefaultMarks(Number(e.target.value))} 
-                       className="bg-white border-2 border-slate-100 rounded-xl p-4 font-bold outline-none focus:border-blue-600 text-slate-700 shadow-sm" />
-              </div>
-              
-              {!selectedType.toLowerCase().includes('mcq') && (
-                <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
-                  <label className="text-[11px] font-black text-purple-600 uppercase ml-1">Qs Per Row</label>
-                  <select value={layoutCols} onChange={(e) => setLayoutCols(Number(e.target.value))}
-                          className="bg-purple-50 border-2 border-purple-100 rounded-xl p-4 font-bold outline-none focus:border-purple-600 text-purple-700 shadow-sm">
-                    <option value={1}>1 Question/Row</option>
-                    <option value={2}>2 Questions/Row</option>
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {viewMode === 'filters' ? (
+            <div className="p-6 sm:p-10 space-y-6 sm:space-y-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+                {/* Category */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Category</label>
+                  <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} 
+                          className="bg-white border-2 border-slate-100 rounded-xl p-3 sm:p-4 font-bold outline-none focus:border-blue-600 text-slate-700 text-sm">
+                    <option value="MCQs">MCQs (Objectives)</option>
+                    <option value="shorts">Short Questions</option>
+                    <option value="longs">Long Questions</option>
                   </select>
                 </div>
-              )}
-            </div>
-            <button onClick={handleSearchTrigger} disabled={isLoading}
-                    className="w-full bg-slate-900 hover:bg-blue-600 text-white py-6 rounded-2xl font-black flex items-center justify-center gap-4 uppercase transition-all shadow-xl active:scale-[0.98] disabled:opacity-50">
-              {isLoading ? <FaSpinner className="animate-spin" /> : <FaSearch />}
-              {isLoading ? "Fetching Data..." : "Find Questions"}
-            </button>
-          </div>
-        ) : (
-          <div className="p-3">
-             <div className="flex justify-between items-center mb-3 text-black">
-              <button onClick={() => setViewMode('filters')} className="flex items-center gap-2 text-blue-600 font-black uppercase text-xs hover:underline">
-                <FaArrowLeft /> Back to Filters
-              </button>
-              <div className="flex items-center gap-3">
-                <div className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-sm font-black text-[10px] flex items-center gap-2">
-                   <FaColumns /> LAYOUT: {layoutCols} COL
+
+                {/* Source Material */}
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Source Material</label>
+                  <div className="flex flex-wrap gap-2">
+                    {["Exercise Questions", "Additional Questions", "Pastpapers Questions"].map((src) => (
+                      <button
+                        key={src}
+                        onClick={() => toggleSource(src)}
+                        className={`flex-1 sm:flex-none px-3 py-2 sm:py-3 rounded-xl text-[9px] sm:text-[11px] font-black uppercase border-2 transition-all ${
+                          selectedSource.includes(src) 
+                          ? 'bg-blue-600 border-blue-600 text-white' 
+                          : 'bg-white border-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {src.split(' ')[0]}
+                      </button>
+                    ))}
+                    <button onClick={() => toggleSource('All')} className="px-3 py-2 sm:py-3 rounded-xl text-[9px] sm:text-[11px] font-black uppercase border-2 border-dashed border-slate-300 text-slate-400">
+                      All
+                    </button>
+                  </div>
                 </div>
-                <div className="bg-blue-600 text-white px-6 py-1.5 rounded-sm shadow-lg font-black text-xs">
-                  SELECTED: {tempSelected.length} / {requiredCount}
+
+                {/* Numbers Row */}
+                <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-3 gap-4 sm:col-span-2 lg:col-span-3">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Total Qs</label>
+                        <input type="number" value={requiredCount} onChange={(e) => setRequiredCount(Number(e.target.value))} 
+                            className="bg-white border-2 border-slate-100 rounded-xl p-3 font-bold text-sm outline-none focus:border-blue-600" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Marks/Q</label>
+                        <input type="number" value={defaultMarks} onChange={(e) => setDefaultMarks(Number(e.target.value))} 
+                            className="bg-white border-2 border-slate-100 rounded-xl p-3 font-bold text-sm outline-none focus:border-blue-600" />
+                    </div>
+                    {!selectedType.toLowerCase().includes('mcq') && (
+                        <div className="flex flex-col gap-1 col-span-2 lg:col-span-1">
+                            <label className="text-[10px] font-black text-blue-600 uppercase ml-1">To Attempt</label>
+                            <input type="number" value={attemptCount} onChange={(e) => setAttemptCount(Number(e.target.value))} 
+                                className="bg-blue-50 border-2 border-blue-100 rounded-xl p-3 font-bold text-sm outline-none focus:border-blue-600" />
+                        </div>
+                    )}
                 </div>
               </div>
-            </div>
 
-            <div className={`grid gap-4 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar mb-6 ${layoutCols === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-              {visibleQuestions.map((q, idx) => {
-                const isSelected = tempSelected.some(item => item.tempId === q.tempId);
-                const isMCQ = selectedType.toLowerCase().includes('mcq');
-                return (
-                  <div key={q.tempId} onClick={() => toggleSelection(q)}
-                       className={`p-4 rounded-lg border-2 transition-all cursor-pointer flex gap-4 h-fit ${
-                         isSelected ? 'border-blue-600 bg-blue-50/50 shadow-md' : 'bg-white border-slate-100 hover:border-blue-200 shadow-sm'
-                       }`}>
-                    <div className={`w-6 h-6 mt-1 rounded-sm border-2 flex items-center justify-center shrink-0 transition-all ${
-                      isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-200 bg-slate-50'
-                    }`}>
-                      {isSelected && <FaCheckSquare size={12} />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                          <p className="font-bold text-slate-800 text-sm leading-snug">
-                            <span className="text-blue-600 mr-2">{idx + 1}.</span> {q.question || q.text}
-                          </p>
-                          <span className="bg-slate-100 text-slate-500 text-[10px] font-black px-2 py-1 rounded ml-2 whitespace-nowrap">
-                            {q.marks} Marks
-                          </span>
-                      </div>
-                      {isMCQ && q.options && (
-                        <div className="grid grid-cols-2 gap-2 mt-3 ml-6">
-                          {Object.entries(q.options).map(([key, value]) => (
-                            <div key={key} className="text-[12px] flex items-center gap-2">
-                              <span className="font-black text-blue-600">{key})</span>
-                              <span className="text-slate-600 font-medium">{String(value)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+              <button onClick={handleSearchTrigger} disabled={isLoading}
+                      className="w-full bg-slate-900 hover:bg-blue-600 text-white py-4 sm:py-6 rounded-2xl font-black flex items-center justify-center gap-4 uppercase transition-all shadow-xl disabled:opacity-50 text-sm">
+                {isLoading ? <FaSpinner className="animate-spin" /> : <FaSearch />}
+                {isLoading ? "Fetching..." : "Find Questions"}
+              </button>
+            </div>
+          ) : (
+            <div className="p-4 flex flex-col h-full">
+               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <button onClick={() => setViewMode('filters')} className="flex items-center gap-2 text-blue-600 font-black uppercase text-[10px] sm:text-xs">
+                  <FaArrowLeft /> Back to Filters
+                </button>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="flex-1 sm:flex-none bg-slate-100 text-slate-600 px-3 py-1.5 rounded-sm font-black text-[9px] flex items-center justify-center gap-2">
+                     <FaColumns /> {layoutCols} COL
                   </div>
-                );
-              })}
-            </div>
+                  <div className="flex-2 sm:flex-none bg-blue-600 text-white px-4 py-1.5 rounded-sm shadow-lg font-black text-[10px] sm:text-xs text-center">
+                    {tempSelected.length} / {requiredCount} SELECTED
+                  </div>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-5 border-t-2 border-slate-50">
-              <button onClick={() => setFilterOnlySelected(false)} className={`flex items-center justify-center gap-2 py-4 rounded-xl font-black uppercase text-xs transition-all ${!filterOnlySelected ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                <FaLayerGroup /> All
-              </button>
-              <button onClick={() => setFilterOnlySelected(true)} className={`flex items-center justify-center gap-2 py-4 rounded-xl font-black uppercase text-xs transition-all ${filterOnlySelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                <FaListUl /> Selected
-              </button>
-              <button onClick={handleRandomSelect} className="flex items-center justify-center gap-2 bg-purple-600 text-white py-4 rounded-xl font-black uppercase text-xs hover:bg-purple-700 transition-all shadow-lg">
-                <FaRandom /> Random Pick
-              </button>
-              <button 
-                disabled={tempSelected.length < Number(requiredCount)}
-                onClick={() => { 
-                  onAddQuestions(tempSelected, { total: requiredCount, attempt: attemptCount, marks: defaultMarks, type: selectedType, layoutCols: layoutCols }); 
-                  onClose(); 
-                }} 
-                className={`flex items-center justify-center gap-2 py-4 rounded-xl font-black uppercase text-xs transition-all shadow-lg ${tempSelected.length < Number(requiredCount) ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
-                {editData ? "Update Paper" : "Add In Paper"}
-              </button>
+              <div className={`grid gap-3 sm:gap-4 pb-24 sm:pb-4 ${layoutCols === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                {visibleQuestions.map((q, idx) => {
+                  const isSelected = tempSelected.some(item => item.tempId === q.tempId);
+                  const isMCQ = selectedType.toLowerCase().includes('mcq');
+                  return (
+                    <div key={q.tempId} onClick={() => toggleSelection(q)}
+                         className={`p-3 sm:p-4 rounded-lg border-2 transition-all cursor-pointer flex gap-3 sm:gap-4 ${
+                           isSelected ? 'border-blue-600 bg-blue-50/50 shadow-md' : 'bg-white border-slate-100'
+                         }`}>
+                      <div className={`w-5 h-5 mt-1 rounded-sm border-2 flex items-center justify-center shrink-0 ${
+                        isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-200 bg-slate-50'
+                      }`}>
+                        {isSelected && <FaCheckSquare size={10} />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start mb-2">
+                            <p className="font-bold text-slate-800 text-xs sm:text-sm leading-snug">
+                              <span className="text-blue-600 mr-1">{idx + 1}.</span> {q.question || q.text}
+                            </p>
+                            <span className="bg-slate-100 text-slate-500 text-[8px] sm:text-[10px] font-black px-2 py-1 rounded ml-2 whitespace-nowrap">
+                              {q.marks}M
+                            </span>
+                        </div>
+                        {isMCQ && q.options && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 mt-2 ml-4">
+                            {Object.entries(q.options).map(([key, value]) => (
+                              <div key={key} className="text-[11px] sm:text-[12px] flex items-center gap-2">
+                                <span className="font-black text-blue-600 uppercase">{key})</span>
+                                <span className="text-slate-600 font-medium">{String(value)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
+        </div>
+
+        {/* Sticky Footer for Selection Mode */}
+        {viewMode === 'selection' && (
+            <div className="fixed bottom-0 left-0 right-0 sm:static bg-white border-t-2 border-slate-100 p-3 sm:p-4 grid grid-cols-4 gap-2 sm:gap-4 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+                <button onClick={() => setFilterOnlySelected(false)} className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-4 rounded-xl font-black uppercase text-[8px] sm:text-xs transition-all ${!filterOnlySelected ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                    <FaLayerGroup className="text-sm sm:text-base" /> <span className="hidden sm:inline">All</span>
+                </button>
+                <button onClick={() => setFilterOnlySelected(true)} className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-4 rounded-xl font-black uppercase text-[8px] sm:text-xs transition-all ${filterOnlySelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                    <FaListUl className="text-sm sm:text-base" /> <span className="hidden sm:inline">Selected</span>
+                </button>
+                <button onClick={handleRandomSelect} className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 bg-purple-600 text-white py-2 sm:py-4 rounded-xl font-black uppercase text-[8px] sm:text-xs shadow-lg">
+                    <FaRandom className="text-sm sm:text-base" /> <span className="hidden sm:inline">Random</span>
+                </button>
+                <button 
+                    disabled={tempSelected.length < Number(requiredCount)}
+                    onClick={() => { 
+                        onAddQuestions(tempSelected, { total: requiredCount, attempt: attemptCount, marks: defaultMarks, type: selectedType, layoutCols: layoutCols }); 
+                        onClose(); 
+                    }} 
+                    className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-4 rounded-xl font-black uppercase text-[8px] sm:text-xs transition-all shadow-lg ${tempSelected.length < Number(requiredCount) ? 'bg-slate-300 text-slate-500' : 'bg-green-600 text-white'}`}>
+                    <FaCheckSquare className="text-sm sm:text-base" /> <span>{editData ? "Update" : "Add"}</span>
+                </button>
+            </div>
         )}
       </div>
     </div>
