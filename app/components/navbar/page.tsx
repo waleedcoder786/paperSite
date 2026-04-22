@@ -126,7 +126,7 @@ const Sidebar = ({ onToggle }: { onToggle?: (isOpen: boolean) => void }) => {
             <FaShieldAlt size={20} />
           </div>
           <div className={`transition-all duration-300 overflow-hidden ${isOpen ? "opacity-100 w-auto" : "opacity-0 w-0"}`}>
-            <h1 className="text-sm font-black text-white tracking-tight uppercase whitespace-nowrap">CTM Admin</h1>
+            <h1 className="text-sm font-black text-white tracking-tight uppercase whitespace-nowrap">TestMind .  </h1>
           </div>
         </div>
       </div>
